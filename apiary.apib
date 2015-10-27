@@ -1,0 +1,3250 @@
+FORMAT: 1A
+HOST: https://itrim-myitrim-api-staging.azurewebsites.net
+
+# MyItrim
+MyItrim is an API for handling the data used by the MyItrim mobile app.
+
+# User Agent
+`<Original User Agent> ; Itrim <AppVersion> <Platform> <PlatformVersion>`
+Example: `WebKit blabla 1.2.3 ; Itrim 1.0 iOS 8.2`
+
+# Localization
+Request to should include the "Accept-Language" HTTP header in order to recive localized data.
+
+# Date and Time
+All date and time are formatted as ISO 8601.
+
+# Compatibility
+Additional properties may be defined. Existing properties' data type will not change (eg. an array will not turn into an object). Existing properties will not be removed. Clients should resilient to these changes.
+
+
+# Group Endpoints
+
+## Userinfo [/connect/userinfo]
+
+### Retrieve the customer [GET]
+There is no REST API endpoint for customer! Use the following link to trigger a login action: https://itrim-authorize-staging.azurewebsites.net/connect/userinfo
+For more info about the response see the following link: http://openid.net/specs/openid-connect-core-1_0.html#StandardClaims
++ Response 200
+
+
+
+## Log [/{customer_id}/logs]
+Log contain logged activities. Possible values for valueCategory are as follows...
+
+Measurable training:   **pt**   **circle**   **other**
+
+Measurable meal:  **rapid_start**   **rapid**   **varied**   **palm_minus**   **palm** **palm_plus** 
+
+### Log an activity as a log event [POST /{customer_id}/logs]
+<!-- The server will aggregate log events appriopriately -->
+
++ Request (application/json)
+    + Attributes (LogEvent)
+
++ Response 201
+    + Headers
+
+            Location: /{customer_id}/logs/{id}
+
+
+
+## Goal [/{customer_id}/goals]
+Handling of goals. Possible values for measurable are as follows...
+Measurable:   **sleep**   **feeling**   **meal**   **drink**   **movement**  **training**   **custom_week**  
+
+### View goal details for a customer [GET]
+Retrieves the full list of all available goals at Itrim. The 'isVisible' flag is used to communicate the visibility of the goal in the log view. 
+NOTE THAT THE CLIENTS EXPECT A GOAL FOR EACH GOAL/MEASURABLE TYPE WHEN FETCHING THE LIST OF GOAL, EVEN IF THE USER HAS NOT CREATED A GOAL. This means that the server will mark goals as invisible=false, for goals that are yet not created by the user. Possible Goal types: sleep, feeling, meal, drink, movement, training.
+
++ Response 200 (application/json)
+    + Attributes (array[Goal])
+
+### Create new goal [POST /{customer_id}/goals/{id}]
+This allows you to create a new goal. If there is an existing user-created goal for the specified measurement,
+that existing goal will be deleted upon the creation of the new goal.
+
++ Request (application/json)
+    + Attributes (Goal)
+
++ Response 201 (application/json)
+    + Headers
+
+            Location: /{customer_id}/goals/{id}
+
+    + Attributes (Goal)
+
+## Health Attribute [/{customer_id}/healthattributes]
+Handling of health attributes. Possible values for measurable are as follows...
+Measurable:   **weight_distribution**   **waist**   **bmi**   **weight**   
+
+### View health attributes for a customer [GET]
+Retrieves the full list of all available health attributes at Itrim. Possible Health attribute types: weight_distribution, waist, bmi, weight.
+
+
++ Response 200 (application/json)
+    + Attributes (array[HealthAttribute])
+
+## Goal Statistics [/{customer_id}/goals/{id}/statistics]
+
+### View statistics for a specific customer goal [GET]
+
++ Response 200 (application/json)
+    + Attributes (Statistics)
+
+## Health Attribute Statistics [/{customer_id}/healthattributes/{id}/statistics]
+
+### View statistics for a specific customer health attribute [GET]
+
++ Response 200 (application/json)
+    + Attributes (Statistics)
+
+## Push tokens [/pushtokens/{id}]
+The payload for iOS notifications is as follows:
+
+`{
+ "aps": {
+   "alert": "Kampanj på bars!",
+   "sound": "default"
+ },
+ "url": "itrimapp://app.itrim.se/views/web?url=http%3A%2F%2Fwww.itrim.se%2Fitrimmetoden"
+}`
+
+The payload for Android notifications is as follows:
+
+`{
+ "title": "Kampanj på bars!",
+ "body": "50% Bara denna helg",
+ "url": "itrimapp://app.itrim.se/views/web?url=http%3A%2F%2Fwww.itrim.se%2Fitrimmetoden",
+ "image": "http://webshop.itrim.se/images/prod100/21511_21512.jpg"
+}`
+
+### Register push tokens [PUT /pushtokens/{id}]
+This actions allows you to create (or overwrite) a push token. It is important that any existing push token id is overwrtitten with the new values, otherwise the push token risks being associated with the wrong customer and will receive notifications that is not supposed to go to that customer.
+
++ Request (application/json)
+    + Attributes (Token)
+
++ Response 201
+    + Headers
+    
+            Location: /pushtokens/{id}
+            
+    + Attributes(Token)
+
+### Unregister push tokens [DELETE /pushtokens/{id}]
+This action allows you to remove an existing push token.Since Retrofit has issues with handling a 204 response, we decided to use 200 instead for now.
+
++ Response 200
+    + Headers
+    
+            Location: /pushtokens/{id}
+            
+    + Attributes(Token)
+
+
+### Centers [/centers]
+
+### List all Itrim Centers [GET]
+There is no REST API endpoint for centers! Use the following link to fetch list of all centers: https://api.itrim.se/centers
+
++ Response 200 (application/json)
+    + Attributes (array[Center])
+
+### Recipes [/recipes]
+
+### List Itrim Recipes [GET]
+There is no REST API endpoint for recepies! Use the following link to fetch list of all recepies: https://api.itrim.se/recipes
+
++ Response 200 (application/json)
+    + Attributes (array[Recipe])
+
+
+
+
+
+
+# Group Push Mock endpoint
+### Push tokens [/mock/pushtokens/{id}]
+#### Register push tokens [PUT]
+
++ Request (application/json)
+    + Attributes (Token)
+
++ Response 201
+    + Headers
+    
+            Location: /pushtokens/{id}
+            
+    + Body
+    
+            {
+                "type":"GCM",
+                "customer_id":"652431"
+            }
+
+
+#### Unregister push tokens [DELETE]
+This action allows you to remove an existing push token.
+
++ Response 200
+    + Headers
+    
+            Location: /pushtokens/1234-MOCK-DELETED
+            
+    + Body
+    
+            {
+                "type":"GCM",
+                "customer_id":"652431"
+            }
+
+
+# Group Log Mock endpoint
+
+### Log [/mock/{customer_id}/logs]
+Log contain logged activities. Possible values for valueCategory are as follows...
+
+Measurable training:   **pt**   **circle**   **other**
+
+Measurable meal:    **rapid_start**   **rapid**   **varied**   **palm_minus**   **palm** **palm_plus** 
+
+<!--### Retrieve log details for a customer [GET /{customer_id}/logs{?activity}{?type}{?from}{?to}{?resolution}{?limit}{?skip}]
+
++ Parameters
+    + activity (optional, string) - Filter on activity
+    + type (optional, string, `circle`) - Filter on activity type
+    + from (optional, date, `1970-01-01T00:00:00.000Z`)
+    + to (optional, date, `2015-05-13T18:08:12.123Z`)
+    + resolution (optional, number) - Use a resolution of the given days
+    + limit (optional, number) - Maximum number of entries to return
+        + Default: '10'
+    + skip (optional, number) - number of items to skip
+        + Default: '0'
+
++ Response 200 (application/json)
+    + Attributes (array[Log Event])-->
+
+#### Log an activity as a log event [POST]
+<!-- The server will aggregate log events appriopriately -->
+
++ Request (application/json)
+    + Attributes (LogEvent)
+
++ Response 201
+    + Headers
+
+            Location: /{customer_id}/logs/{id}
+
+
+
+
+
+# Group Goals Mock endpoint
+
+### Goal [/mock/{customer_id}/goals]
+Mock of goals. Possible values for measurable are as follows...
+Measurable:   **sleep**   **feeling**   **meal**   **drink**   **movement**   **training**   **custom_week**   
+
+
+#### View goal details for a customer [GET]
+
++ Response 200 (application/json)
+
+             [
+             {
+                "id":2034,
+                "measurable": "training",
+                "valueCategory": "pt",
+                "visible": true,
+                "from": "2015-08-01T00:00:00.123Z",
+                "to": "2015-11-30T23:59:20.123Z",
+                "title": "Träning",
+                "progressTitle": "3 av 3 pass denna vecka",
+                "value": 3,
+                "statistics": [
+                   {
+                    "labelTitle": "L",
+                    "labelSubtitle": "21/1",
+                    "progress": 1.0
+                  },
+                  {
+                    "labelTitle": "S",
+                    "labelSubtitle": "22/1",
+                    "progress": 1.33
+                  },
+                  {
+                    "labelTitle": "M",
+                    "labelSubtitle": "23/1",
+                    "progress": 0.0
+                  },
+                  {
+                    "labelTitle": "T",
+                    "labelSubtitle": "24/1",
+                    "progress": 1.0
+                  },
+                  {
+                    "labelTitle": "O",
+                    "labelSubtitle": "25/1",
+                    "progress": 0.96
+                  },
+                  {
+                    "labelTitle": "T",
+                    "labelSubtitle": "26/1",
+                    "progress": 0.86
+                  },
+                  {
+                    "labelTitle": "F",
+                    "labelSubtitle": "27/1",
+                    "progress": 1.00
+                  }
+                ]
+              },
+              {
+                "id":1111,
+                "measurable": "movement",
+                "valueCategory": "",
+                "visible": true,
+                "from": "2015-05-01T00:00:00.123Z",
+                "to": "2015-05-31T23:59:20.123Z",
+                "title": "Steg",
+                "progressTitle": "8107 av 10000 steg idag",
+                "value": 10000,
+                "statistics": [
+                   {
+                    "labelTitle": "L",
+                    "labelSubtitle": "21/1",
+                    "progress": 1.0
+                  },
+                  {
+                    "labelTitle": "S",
+                    "labelSubtitle": "22/1",
+                    "progress": 0.7
+                  },
+                  {
+                    "labelTitle": "M",
+                    "labelSubtitle": "23/1",
+                    "progress": 1.33
+                  },
+                  {
+                    "labelTitle": "T",
+                    "labelSubtitle": "24/1",
+                    "progress": 0.0
+                  },
+                  {
+                    "labelTitle": "O",
+                    "labelSubtitle": "25/1",
+                    "progress": 1.5
+                  },
+                  {
+                    "labelTitle": "T",
+                    "labelSubtitle": "26/1",
+                    "progress": 0.9
+                  },
+                  {
+                    "labelTitle": "F",
+                    "labelSubtitle": "27/1",
+                    "progress": 0.8
+                  },{
+                                 "labelTitle": "L",
+                    "labelSubtitle": "21/1",
+                    "progress": 1.0
+                  },
+                  {
+                    "labelTitle": "S",
+                    "labelSubtitle": "22/1",
+                    "progress": 0.7
+                  },
+                  {
+                    "labelTitle": "M",
+                    "labelSubtitle": "23/1",
+                    "progress": 0.0
+                  },
+                  {
+                    "labelTitle": "T",
+                    "labelSubtitle": "24/1",
+                    "progress": 0.0
+                  },
+                  {
+                    "labelTitle": "O",
+                    "labelSubtitle": "25/1",
+                    "progress": 1.1
+                  },
+                  {
+                    "labelTitle": "T",
+                    "labelSubtitle": "26/1",
+                    "progress": 1.0
+                  },
+                  {
+                    "labelTitle": "F",
+                    "labelSubtitle": "27/1",
+                    "progress": 0.8
+                  },{
+                    "labelTitle": "L",
+                    "labelSubtitle": "21/1",
+                    "progress": 1.0
+                  },
+                  {
+                    "labelTitle": "S",
+                    "labelSubtitle": "22/1",
+                    "progress": 0.9
+                  },
+                  {
+                    "labelTitle": "M",
+                    "labelSubtitle": "23/1",
+                    "progress": 0.0
+                  },
+                  {
+                    "labelTitle": "T",
+                    "labelSubtitle": "24/1",
+                    "progress": 0.0
+                  },
+                  {
+                    "labelTitle": "O",
+                    "labelSubtitle": "25/1",
+                    "progress": 1.0
+                  },
+                  {
+                    "labelTitle": "T",
+                    "labelSubtitle": "26/1",
+                    "progress": 0.9
+                  },
+                  {
+                    "labelTitle": "F",
+                    "labelSubtitle": "27/1",
+                    "progress": 0.8
+                  }
+                ]
+              },
+              {
+                "id": 6666,
+                "measurable": "meal",
+                "valueCategory": "rapid",
+                "visible": true,
+                "from": "2015-05-01T00:00:00.123Z",
+                "to": "2015-05-31T23:59:20.123Z",
+                "title": "Mat",
+                "progressTitle": "Ätit rätt 5 dagar denna vecka",
+                "value": 1,
+                "statistics": [
+                  {
+                    "labelTitle": "L",
+                    "labelSubtitle": "21/1",
+                    "progress": 1.0
+                  },
+                  {
+                    "labelTitle": "S",
+                    "labelSubtitle": "22/1",
+                    "progress": 0.0
+                  },
+                  {
+                    "labelTitle": "M",
+                    "labelSubtitle": "23/1",
+                    "progress": 1.0
+                  },
+                  {
+                    "labelTitle": "T",
+                    "labelSubtitle": "24/1",
+                    "progress": 0.0
+                  },
+                  {
+                    "labelTitle": "O",
+                    "labelSubtitle": "25/1",
+                    "progress": 0.0
+                  },
+                  {
+                    "labelTitle": "T",
+                    "labelSubtitle": "26/1",
+                    "progress": 1.0
+                  },
+                  {
+                    "labelTitle": "F",
+                    "labelSubtitle": "27/1",
+                    "progress": 1.0
+                  }
+                ]
+              },
+              {
+                "id": 4321,
+                "measurable": "drink",
+                "valueCategory": "water",
+                "visible": true,
+                "from": "2015-05-01T00:00:00.123Z",
+                "to": "2015-05-31T23:59:20.123Z",
+                "title": "Vatten",
+                "progressTitle": "9 av 10 glas idag",
+                "value": 10,
+                "statistics": [
+                  {
+                    "labelTitle": "L",
+                    "labelSubtitle": "21/1",
+                    "progress": 1.0
+                  },
+                  {
+                    "labelTitle": "S",
+                    "labelSubtitle": "22/1",
+                    "progress": 0.8
+                  },
+                  {
+                    "labelTitle": "M",
+                    "labelSubtitle": "23/1",
+                    "progress": 0.5
+                  },
+                  {
+                    "labelTitle": "T",
+                    "labelSubtitle": "24/1",
+                    "progress": 1.0
+                  },
+                  {
+                    "labelTitle": "O",
+                    "labelSubtitle": "25/1",
+                    "progress": 0.3
+                  },
+                  {
+                    "labelTitle": "T",
+                    "labelSubtitle": "26/1",
+                    "progress": 1.2
+                  },
+                  {
+                    "labelTitle": "F",
+                    "labelSubtitle": "27/1",
+                    "progress": 0.9
+                  }
+                ]
+              },
+              {
+                "id": 776,
+                "measurable": "feeling",
+                "valueCategory": "",
+                "visible": true,
+                "from": "2015-05-01T00:00:00.123Z",
+                "to": "2015-05-31T23:59:20.123Z",
+                "title": "Välbefinnande",
+                "progressTitle": "Hur mår du idag?",
+                "value": 0.5,
+                "statistics": [
+                  {
+                    "labelTitle": "L",
+                    "labelSubtitle": "21/1",
+                    "progress": 0.5
+                  },
+                  {
+                    "labelTitle": "S",
+                    "labelSubtitle": "22/1",
+                    "progress": 0.2
+                  },
+                  {
+                    "labelTitle": "M",
+                    "labelSubtitle": "23/1",
+                    "progress": 2.0
+                  },
+                  {
+                    "labelTitle": "T",
+                    "labelSubtitle": "24/1",
+                    "progress": 1.0
+                  },
+                  {
+                    "labelTitle": "O",
+                    "labelSubtitle": "25/1",
+                    "progress": 1.6
+                  },
+                  {
+                    "labelTitle": "T",
+                    "labelSubtitle": "26/1",
+                    "progress": 1.1
+                  }
+                ]
+              },
+               {
+                "id": 6756,
+                "measurable": "sleep",
+                "valueCategory": "",
+                "visible": true,
+                "from": "2015-05-01T00:00:00.123Z",
+                "to": "2015-05-31T23:59:20.123Z",
+                "title": "Sömn",
+                "progressTitle": "8 av 8 timmar just nu",
+                "value": 0.5,
+                "statistics": [
+                  {
+                    "labelTitle": "L",
+                    "labelSubtitle": "21/1",
+                    "progress": 0.5
+                  },
+                  {
+                    "labelTitle": "S",
+                    "labelSubtitle": "22/1",
+                    "progress": 0.2
+                  },
+                  {
+                    "labelTitle": "M",
+                    "labelSubtitle": "23/1",
+                    "progress": 2.0
+                  },
+                  {
+                    "labelTitle": "T",
+                    "labelSubtitle": "24/1",
+                    "progress": 1.0
+                  },
+                  {
+                    "labelTitle": "O",
+                    "labelSubtitle": "25/1",
+                    "progress": 1.6
+                  },
+                  {
+                    "labelTitle": "T",
+                    "labelSubtitle": "26/1",
+                    "progress": 1.1
+                  }
+                ]
+               },
+               {
+                "id": 8001,
+                "measurable": "custom_week",
+                "valueCategory": "one",
+                "visible": true,
+                "from": "2015-05-01T00:00:00.123Z",
+                "to": "2015-05-31T23:59:20.123Z",
+                "title": "Sova kl. 23:00",
+                "progressTitle": "2 av 7 denna vecka",
+                "value": 0.25,
+                "statistics": [
+                  {
+                    "labelTitle": "L",
+                    "labelSubtitle": "21/1",
+                    "progress": 0.5
+                  },
+                  {
+                    "labelTitle": "S",
+                    "labelSubtitle": "22/1",
+                    "progress": 0.2
+                  }
+                ]
+               },
+               {
+                "id": 8002,
+                "measurable": "custom_week",
+                "valueCategory": "two",
+                "visible": true,
+                "from": "2015-05-01T00:00:00.123Z",
+                "to": "2015-05-31T23:59:20.123Z",
+                "title": "Yoga",
+                "progressTitle": "2 av 2 denna vecka",
+                "value": 0.5,
+                "statistics": [
+                  {
+                    "labelTitle": "L",
+                    "labelSubtitle": "21/1",
+                    "progress": 0.5
+                  },
+                  {
+                    "labelTitle": "S",
+                    "labelSubtitle": "22/1",
+                    "progress": 0.2
+                  },
+                  {
+                    "labelTitle": "M",
+                    "labelSubtitle": "23/1",
+                    "progress": 2.0
+                  },
+                  {
+                    "labelTitle": "T",
+                    "labelSubtitle": "24/1",
+                    "progress": 1.0
+                  },
+                  {
+                    "labelTitle": "O",
+                    "labelSubtitle": "25/1",
+                    "progress": 1.6
+                  },
+                  {
+                    "labelTitle": "T",
+                    "labelSubtitle": "26/1",
+                    "progress": 1.1
+                  }
+                ]
+               },
+               {
+                "id": 8003,
+                "measurable": "custom_week",
+                "valueCategory": "three",
+                "visible": false,
+                "from": "2015-05-01T00:00:00.123Z",
+                "to": "2015-05-31T23:59:20.123Z",
+                "title": "Egen aktivtet",
+                "progressTitle": "0 av 3 denna vecka",
+                "value": 0.5,
+                "statistics": [
+                  {
+                    "labelTitle": "L",
+                    "labelSubtitle": "21/1",
+                    "progress": 0.5
+                  },
+                  {
+                    "labelTitle": "S",
+                    "labelSubtitle": "22/1",
+                    "progress": 0.2
+                  },
+                  {
+                    "labelTitle": "M",
+                    "labelSubtitle": "23/1",
+                    "progress": 2.0
+                  },
+                  {
+                    "labelTitle": "T",
+                    "labelSubtitle": "24/1",
+                    "progress": 1.0
+                  },
+                  {
+                    "labelTitle": "O",
+                    "labelSubtitle": "25/1",
+                    "progress": 1.6
+                  },
+                  {
+                    "labelTitle": "T",
+                    "labelSubtitle": "26/1",
+                    "progress": 1.1
+                  }
+                ]
+               },
+               {
+                "id": 8002,
+                "measurable": "custom_week",
+                "valueCategory": "four",
+                "visible": false,
+                "from": "2015-05-01T00:00:00.123Z",
+                "to": "2015-05-31T23:59:20.123Z",
+                "title": "Egen aktivtet",
+                "progressTitle": "0 av 3 denna vecka",
+                "value": 2,
+                "statistics": [
+                  {
+                    "labelTitle": "L",
+                    "labelSubtitle": "21/1",
+                    "progress": 1
+                  },
+                  {
+                    "labelTitle": "S",
+                    "labelSubtitle": "22/1",
+                    "progress": 1.1
+                  },
+                  {
+                    "labelTitle": "M",
+                    "labelSubtitle": "23/1",
+                    "progress": 0.8
+                  },
+                  {
+                    "labelTitle": "T",
+                    "labelSubtitle": "24/1",
+                    "progress": 0.9
+                  },
+                  {
+                    "labelTitle": "O",
+                    "labelSubtitle": "25/1",
+                    "progress": 0.5
+                  },
+                  {
+                    "labelTitle": "T",
+                    "labelSubtitle": "26/1",
+                    "progress": 0.9
+                  },
+                   {
+                    "labelTitle": "F",
+                    "labelSubtitle": "27/1",
+                    "progress": 1.0
+                  }
+                ]
+              }
+            ]
+
+
+#### Create new goal [POST]
+This allows you to create a new goal. If there is an existing user-created goal for the specified measurement,
+that existing goal will be deleted upon the creation of the new goal.
+
++ Request (application/json)
+    + Attributes (Goal)
+
++ Response 201 (application/json)
+    + Headers
+
+            Location: /{customer_id}/goals/{id}
+        
+    + Body
+    
+            {
+                "id":6767,
+                "measurable": "sleep",
+                "valueCategory": "",
+                "visible": true,
+                "from": "2015-11-01T00:00:00.123Z",
+                "to": "2015-12-31T23:59:20.123Z",
+                "title": "Sömn",
+                "progressTitle": "0 av 8 timmar",
+                "value": 0.0,
+                "statistics": []
+              }
+              
+
+
+# Group Statistics for Goals Mock endpoint
+
+### Statistics training [/mock/{customer_id}/goals/2034/statistics]
+Mock of goal statistics for training
+
+#### View statistics for a specific customer goal [GET]
+
++ Response 200 (application/json)
+
+            {
+              "currentProgressTitle": "3",
+              "currentProgressSubtitle": "Denna vecka",
+              "currentGoalTitle": "3",
+              "currentGoalSubtitle": "Veckans mål",
+              "graphStatistics": [
+                {
+                  "title": "Daglig",
+                  "values": [
+                    {
+                      "labelTitle": "21/1",
+                      "labelSubtitle": "21/1",
+                      "progress": 0.0
+                    },
+                    {
+                      "labelTitle": "22/1",
+                      "labelSubtitle": "22/1",
+                      "progress": 0.33
+                    }, {
+                      "labelTitle": "23/1",
+                      "labelSubtitle": "23/1",
+                      "progress": 0.33
+                    }, {
+                      "labelTitle": "24/1",
+                      "labelSubtitle": "24/1",
+                      "progress": 0.66
+                    }, {
+                      "labelTitle": "25/1",
+                      "labelSubtitle": "25/1",
+                      "progress": 1.0
+                    }, {
+                      "labelTitle": "26/1",
+                      "labelSubtitle": "26/1",
+                      "progress": 0.0
+                    }, {
+                      "labelTitle": "27/1",
+                      "labelSubtitle": "27/1",
+                      "progress": 0.33
+                    }
+                  ]
+                },
+                {
+                  "title": "Veckovis",
+                  "values": [
+                      {
+                        "labelTitle": "v.31",
+                        "labelSubtitle": "1/1",
+                        "progress": 0.2
+                      }, {
+                        "labelTitle": "v.32",
+                        "labelSubtitle": "2/1",
+                        "progress": 0.72
+                      }, {
+                        "labelTitle": "v.33",
+                        "labelSubtitle": "3/1",
+                        "progress": 0.26
+                      }, {
+                        "labelTitle": "v.34",
+                        "labelSubtitle": "4/1",
+                        "progress": 0.78
+                      }, {
+                        "labelTitle": "v.35",
+                        "labelSubtitle": "5/1",
+                        "progress": 1.2
+                      }, {
+                        "labelTitle": "v.36",
+                        "labelSubtitle": "6/1",
+                        "progress": 0.5
+                      }, {
+                        "labelTitle": "v.37",
+                        "labelSubtitle": "7/1",
+                        "progress": 2.0
+                      }, {
+                        "labelTitle": "v.38",
+                        "labelSubtitle": "8/1",
+                        "progress": 0.9
+                      }, {
+                        "labelTitle": "v.39",
+                        "labelSubtitle": "9/1",
+                        "progress": 0.9
+                      }, {
+                        "labelTitle": "v.40",
+                        "labelSubtitle": "10/1",
+                        "progress": 0.9
+                      }, {
+                        "labelTitle": "v.50",
+                        "labelSubtitle": "11/1",
+                        "progress": 1.2
+                      }, {
+                        "labelTitle": "v.51",
+                        "labelSubtitle": "12/1",
+                        "progress": 1.5
+                      }
+                  ]
+                },
+                {
+                  "title": "Månadsvis",
+                  "values": [
+                    {
+                        "labelTitle": "feb",
+                        "labelSubtitle": "1/2",
+                        "progress": 1.2
+                      }, {
+                        "labelTitle": "mar",
+                        "labelSubtitle": "2/2",
+                        "progress": 1.3
+                      }, {
+                        "labelTitle": "apr",
+                        "labelSubtitle": "3/2",
+                        "progress": 1.4
+                      }, {
+                        "labelTitle": "maj",
+                        "labelSubtitle": "4/2",
+                        "progress": 1.5
+                      }, {
+                        "labelTitle": "jun",
+                        "labelSubtitle": "5/2",
+                        "progress": 1.6
+                      }, {
+                        "labelTitle": "jul",
+                        "labelSubtitle": "6/2",
+                        "progress": 1.7
+                      }, {
+                        "labelTitle": "aug",
+                        "labelSubtitle": "7/2",
+                        "progress": 1.8
+                      }, {
+                        "labelTitle": "sep",
+                        "labelSubtitle": "8/2",
+                        "progress": 1.9
+                      }, {
+                        "labelTitle": "okt",
+                        "labelSubtitle": "9/2",
+                        "progress": 2.0
+                      }, {
+                        "labelTitle": "nov",
+                        "labelSubtitle": "10/2",
+                        "progress": 1.0
+                      }, {
+                        "labelTitle": "dec",
+                        "labelSubtitle": "11/2",
+                        "progress": 1.0
+                      }, {
+                        "labelTitle": "jan",
+                        "labelSubtitle": "12/2",
+                        "progress": 0.1
+                      }
+                  ]
+                }
+              ],
+              "funFacts": [
+                {
+                  "title": "Du tränar helst",
+                  "subTitle": "Under maj",
+                  "valueTitle": "Cirkel"
+                }, {
+                 "title": "Svetten lackar på",
+                 "subTitle": "Under maj",
+                 "valueTitle": "Tisdagar"
+                }, {
+                 "title": "Ditt veckosnitt",
+                  "subTitle": "Under maj",
+                  "valueTitle": "4"
+                }
+              ]
+            }
+
+### Statistics Food [/mock/{customer_id}/goals/6666/statistics]
+Mock of goal statistics for food
+
+#### View statistics for a specific customer goal [GET]
+
++ Response 200 (application/json)
+
+            {
+              "currentProgressTitle": "Ja",
+              "currentProgressSubtitle": "Ätit enligt plan idag",
+              "currentGoalTitle": "",
+              "currentGoalSubtitle": "",
+              "graphStatistics": [
+                {
+                  "title": "Dagligen",
+                  "values": [
+                    {
+                      "labelTitle": "M",
+                      "labelSubtitle": "21/1",
+                      "progress": 0.0
+                    },
+                    {
+                      "labelTitle": "T",
+                      "labelSubtitle": "22/1",
+                      "progress": 1.0
+                    }, {
+                      "labelTitle": "O",
+                      "labelSubtitle": "23/1",
+                      "progress": 1.0
+                    }, {
+                      "labelTitle": "T",
+                      "labelSubtitle": "24/1",
+                      "progress": 0.0
+                    }, {
+                      "labelTitle": "F",
+                      "labelSubtitle": "25/1",
+                      "progress": 1.0
+                    }, {
+                      "labelTitle": "L",
+                      "labelSubtitle": "26/1",
+                      "progress": 1.0
+                    }, {
+                      "labelTitle": "S",
+                      "labelSubtitle": "27/1",
+                      "progress": 1.0
+                    }
+                  ]
+                },
+                {
+                  "title": "Veckovis",
+                  "values": [
+                      {
+                        "labelTitle": "M",
+                        "labelSubtitle": "1/1",
+                        "progress": 0.2
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "2/1",
+                        "progress": 0.72
+                      }, {
+                        "labelTitle": "O",
+                        "labelSubtitle": "3/1",
+                        "progress": 0.26
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "4/1",
+                        "progress": 0.78
+                      }, {
+                        "labelTitle": "F",
+                        "labelSubtitle": "5/1",
+                        "progress": 1.2
+                      }, {
+                        "labelTitle": "L",
+                        "labelSubtitle": "6/1",
+                        "progress": 0.5
+                      }, {
+                        "labelTitle": "S",
+                        "labelSubtitle": "7/1",
+                        "progress": 2.0
+                      }, {
+                        "labelTitle": "M",
+                        "labelSubtitle": "8/1",
+                        "progress": 0.9
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "9/1",
+                        "progress": 0.9
+                      }
+                  ]
+                },
+                {
+                  "title": "Månadsvis",
+                  "values": [
+                    {
+                        "labelTitle": "M",
+                        "labelSubtitle": "1/2",
+                        "progress": 1.2
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "2/2",
+                        "progress": 1.3
+                      }, {
+                        "labelTitle": "O",
+                        "labelSubtitle": "3/2",
+                        "progress": 1.4
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "4/2",
+                        "progress": 1.5
+                      }, {
+                        "labelTitle": "F",
+                        "labelSubtitle": "5/2",
+                        "progress": 1.6
+                      }, {
+                        "labelTitle": "L",
+                        "labelSubtitle": "6/2",
+                        "progress": 1.7
+                      }, {
+                        "labelTitle": "S",
+                        "labelSubtitle": "7/2",
+                        "progress": 1.8
+                      }
+                  ]
+                }
+              ],
+              "funFacts": [
+                {
+                  "title": "Dagar som gått bra",
+                  "subTitle": "under maj",
+                  "valueTitle": "24"
+                }, {
+                 "title": "Trillar ofta dit på",
+                 "subTitle": "under maj",
+                 "valueTitle": "Onsdagar"
+                }
+              ]
+            }
+
+### Statistics movement [/mock/{customer_id}/goals/1111/statistics]
+Mock of goal statistics Movement
+
+#### View statistics for a specific customer goal [GET]
+
++ Response 200 (application/json)
+
+            {
+              "currentProgressTitle": "10 700",
+              "currentProgressSubtitle": "Steg idag",
+              "currentGoalTitle": "9 000",
+              "currentGoalSubtitle": "Dagens mål",
+              "graphStatistics": [
+                {
+                  "title": "Daglig",
+                  "values": [
+                    {
+                      "labelTitle": "M",
+                      "labelSubtitle": "21/1",
+                      "progress": 0.1
+                    },
+                    {
+                      "labelTitle": "T",
+                      "labelSubtitle": "22/1",
+                      "progress": 0.62
+                    }, {
+                      "labelTitle": "O",
+                      "labelSubtitle": "23/1",
+                      "progress": 0.46
+                    }, {
+                      "labelTitle": "T",
+                      "labelSubtitle": "24/1",
+                      "progress": 0.68
+                    }, {
+                      "labelTitle": "F",
+                      "labelSubtitle": "25/1",
+                      "progress": 0.96
+                    }, {
+                      "labelTitle": "L",
+                      "labelSubtitle": "26/1",
+                      "progress": 1.6
+                    }, {
+                      "labelTitle": "S",
+                      "labelSubtitle": "27/1",
+                      "progress": 0.0
+                    }
+                  ]
+                },
+                {
+                  "title": "Veckovis",
+                  "values": [
+                      {
+                        "labelTitle": "M",
+                        "labelSubtitle": "1/1",
+                        "progress": 0.2
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "2/1",
+                        "progress": 0.72
+                      }, {
+                        "labelTitle": "O",
+                        "labelSubtitle": "3/1",
+                        "progress": 0.26
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "4/1",
+                        "progress": 0.78
+                      }, {
+                        "labelTitle": "F",
+                        "labelSubtitle": "5/1",
+                        "progress": 1.2
+                      }, {
+                        "labelTitle": "L",
+                        "labelSubtitle": "6/1",
+                        "progress": 0.5
+                      }, {
+                        "labelTitle": "S",
+                        "labelSubtitle": "7/1",
+                        "progress": 2.0
+                      }, {
+                        "labelTitle": "M",
+                        "labelSubtitle": "8/1",
+                        "progress": 0.9
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "9/1",
+                        "progress": 0.9
+                      }
+                  ]
+                },
+                {
+                  "title": "Månadsvis",
+                  "values": [
+                    {
+                        "labelTitle": "M",
+                        "labelSubtitle": "1/2",
+                        "progress": 1.2
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "2/2",
+                        "progress": 1.3
+                      }, {
+                        "labelTitle": "O",
+                        "labelSubtitle": "3/2",
+                        "progress": 1.4
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "4/2",
+                        "progress": 1.5
+                      }, {
+                        "labelTitle": "F",
+                        "labelSubtitle": "5/2",
+                        "progress": 1.6
+                      }, {
+                        "labelTitle": "L",
+                        "labelSubtitle": "6/2",
+                        "progress": 1.7
+                      }, {
+                        "labelTitle": "S",
+                        "labelSubtitle": "7/2",
+                        "progress": 1.8
+                      }, {
+                        "labelTitle": "M",
+                        "labelSubtitle": "8/2",
+                        "progress": 1.9
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "9/2",
+                        "progress": 2.0
+                      }
+                  ]
+                }
+              ],
+              "funFacts": [
+                {
+                  "title": "Steg per dag",
+                  "subTitle": "Snitt under maj",
+                  "valueTitle": "6370"
+                }, {
+                 "title": "Sulorna slits mest på",
+                 "subTitle": "Under maj",
+                 "valueTitle": "Måndagar"
+                }, {
+                 "title": "Du tycks nöta soffan på",
+                  "subTitle": "Under maj",
+                  "valueTitle": "Söndagar"
+                }
+              ]
+            }
+            
+### Statistics drinking [/mock/{customer_id}/goals/4321/statistics]
+Mock of goal statistics for drinking
+
+#### View statistics for a specific customer goal [GET]
+
++ Response 200 (application/json)
+
+            {
+              "currentProgressTitle": "7",
+              "currentProgressSubtitle": "Glas idag",
+              "currentGoalTitle": "4",
+              "currentGoalSubtitle": "Dagens mål",
+              "graphStatistics": [
+                {
+                  "title": "Daglig",
+                  "values": [
+                    {
+                      "labelTitle": "21/5",
+                      "labelSubtitle": "21/1",
+                      "progress": 0.0
+                    }
+                  ]
+                },
+                {
+                  "title": "Veckovis",
+                  "values": [
+                      {
+                        "labelTitle": "v.14",
+                        "labelSubtitle": "1/1",
+                        "progress": 0.0
+                      }
+                  ]
+                },
+                {
+                  "title": "Månadsvis",
+                  "values": [
+                    {
+                        "labelTitle": "maj",
+                        "labelSubtitle": "1/2",
+                        "progress": 0.0
+                      }
+                  ]
+                }
+              ],
+              "funFacts": [
+                {
+                  "title": "Glas per dag",
+                  "subTitle": "Snitt under maj",
+                  "valueTitle": "5"
+                }
+              ]
+            }
+            
+### Statistics feeling  [/mock/{customer_id}/goals/776/statistics]
+Mock of goal statistics for feeling
+
+#### View statistics for a specific customer goal [GET]
+
++ Response 200 (application/json)
+
+            {
+              "currentProgressTitle": "Ja",
+              "currentProgressSubtitle": "Loggat idag",
+              "currentGoalTitle": "",
+              "currentGoalSubtitle": "",
+              "graphStatistics": [
+                {
+                  "title": "Daglig",
+                  "values": [
+                    {
+                      "labelTitle": "M",
+                      "labelSubtitle": "21/1",
+                      "progress": 0.1
+                    },
+                    {
+                      "labelTitle": "T",
+                      "labelSubtitle": "22/1",
+                      "progress": 0.62
+                    }, {
+                      "labelTitle": "O",
+                      "labelSubtitle": "23/1",
+                      "progress": 0.46
+                    }, {
+                      "labelTitle": "T",
+                      "labelSubtitle": "24/1",
+                      "progress": 0.68
+                    }, {
+                      "labelTitle": "F",
+                      "labelSubtitle": "25/1",
+                      "progress": 1.96
+                    }, {
+                      "labelTitle": "L",
+                      "labelSubtitle": "26/1",
+                      "progress": 1.6
+                    }, {
+                      "labelTitle": "S",
+                      "labelSubtitle": "27/1",
+                      "progress": 1.6
+                    }
+                  ]
+                },
+                {
+                  "title": "Veckovis",
+                  "values": [
+                      {
+                        "labelTitle": "M",
+                        "labelSubtitle": "1/1",
+                        "progress": 0.2
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "2/1",
+                        "progress": 0.72
+                      }, {
+                        "labelTitle": "O",
+                        "labelSubtitle": "3/1",
+                        "progress": 0.26
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "4/1",
+                        "progress": 0.78
+                      }, {
+                        "labelTitle": "F",
+                        "labelSubtitle": "5/1",
+                        "progress": 1.2
+                      }, {
+                        "labelTitle": "L",
+                        "labelSubtitle": "6/1",
+                        "progress": 0.5
+                      }, {
+                        "labelTitle": "S",
+                        "labelSubtitle": "7/1",
+                        "progress": 2.0
+                      }, {
+                        "labelTitle": "M",
+                        "labelSubtitle": "8/1",
+                        "progress": 0.9
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "9/1",
+                        "progress": 0.9
+                      }, {
+                        "labelTitle": "O",
+                        "labelSubtitle": "10/1",
+                        "progress": 0.9
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "11/1",
+                        "progress": 1.2
+                      }, {
+                        "labelTitle": "F",
+                        "labelSubtitle": "12/1",
+                        "progress": 1.5
+                      }, {
+                        "labelTitle": "L",
+                        "labelSubtitle": "13/1",
+                        "progress": 1.6
+                      }, {
+                        "labelTitle": "S",
+                        "labelSubtitle": "14/1",
+                        "progress": 1.6
+                      }
+                  ]
+                },
+                {
+                  "title": "Månadsvis",
+                  "values": [
+                    {
+                        "labelTitle": "M",
+                        "labelSubtitle": "1/2",
+                        "progress": 1.2
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "2/2",
+                        "progress": 1.3
+                      }, {
+                        "labelTitle": "O",
+                        "labelSubtitle": "3/2",
+                        "progress": 1.4
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "4/2",
+                        "progress": 1.5
+                      }, {
+                        "labelTitle": "F",
+                        "labelSubtitle": "5/2",
+                        "progress": 1.6
+                      }, {
+                        "labelTitle": "L",
+                        "labelSubtitle": "6/2",
+                        "progress": 1.7
+                      }, {
+                        "labelTitle": "S",
+                        "labelSubtitle": "7/2",
+                        "progress": 1.8
+                      }, {
+                        "labelTitle": "M",
+                        "labelSubtitle": "8/2",
+                        "progress": 1.9
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "9/2",
+                        "progress": 2.0
+                      }, {
+                        "labelTitle": "O",
+                        "labelSubtitle": "10/2",
+                        "progress": 1.0
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "11/2",
+                        "progress": 1.0
+                      }, {
+                        "labelTitle": "F",
+                        "labelSubtitle": "12/2",
+                        "progress": 0.1
+                      }, {
+                        "labelTitle": "L",
+                        "labelSubtitle": "13/2",
+                        "progress": 0.0
+                      }, {
+                        "labelTitle": "S",
+                        "labelSubtitle": "14/2",
+                        "progress": 0.0
+                      },{
+                        "labelTitle": "M",
+                        "labelSubtitle": "15/2",
+                        "progress": 0.1
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "16/2",
+                        "progress": 0.5
+                      }, {
+                        "labelTitle": "O",
+                        "labelSubtitle": "17/2",
+                        "progress": 0.6
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "18/2",
+                        "progress": 0.7
+                      }, {
+                        "labelTitle": "F",
+                        "labelSubtitle": "19/2",
+                        "progress": 0.8
+                      }, {
+                        "labelTitle": "L",
+                        "labelSubtitle": "20/2",
+                        "progress": 1.6
+                      }, {
+                        "labelTitle": "S",
+                        "labelSubtitle": "21/2",
+                        "progress": 1.6
+                      }, {
+                        "labelTitle": "M",
+                        "labelSubtitle": "22/2",
+                        "progress": 1.9
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "23/2",
+                        "progress": 1.0
+                      }, {
+                        "labelTitle": "O",
+                        "labelSubtitle": "24/2",
+                        "progress": 1.0
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "25/2",
+                        "progress": 0.8
+                      }, {
+                        "labelTitle": "F",
+                        "labelSubtitle": "26/2",
+                        "progress": 0.6
+                      }, {
+                        "labelTitle": "L",
+                        "labelSubtitle": "27/2",
+                        "progress": 1.6
+                      }, {
+                        "labelTitle": "S",
+                        "labelSubtitle": "28/2",
+                        "progress": 2.6
+                      },{
+                        "labelTitle": "M",
+                        "labelSubtitle": "1/3",
+                        "progress": 0.1
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "2/3",
+                        "progress": 0.4
+                      }, {
+                        "labelTitle": "O",
+                        "labelSubtitle": "3/3",
+                        "progress": 0.6
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "4/3",
+                        "progress": 0.7
+                      }, {
+                        "labelTitle": "F",
+                        "labelSubtitle": "5/3",
+                        "progress": 0.9
+                      }, {
+                        "labelTitle": "L",
+                        "labelSubtitle": "6/3",
+                        "progress": 1.2
+                      }, {
+                        "labelTitle": "S",
+                        "labelSubtitle": "7/3",
+                        "progress": 2.6
+                      }, {
+                        "labelTitle": "M",
+                        "labelSubtitle": "8/3",
+                        "progress": 0.6
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "9/3",
+                        "progress": 0.67
+                      }, {
+                        "labelTitle": "O",
+                        "labelSubtitle": "10/3",
+                        "progress": 0.5
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "11/3",
+                        "progress": 0.5
+                      }, {
+                        "labelTitle": "F",
+                        "labelSubtitle": "12/3",
+                        "progress": 1.0
+                      }, {
+                        "labelTitle": "L",
+                        "labelSubtitle": "13/3",
+                        "progress": 1.1
+                      }
+                  ]
+                }
+              ],
+              "funFacts": [
+                {
+                  "title": "Jag mår bäst på",
+                  "subTitle": "under maj",
+                  "valueTitle": "Tisdagar, Onsdagar"
+                }, 
+                 {
+                  "title": "Det är uppförsbacke på",
+                  "subTitle": "Under maj",
+                  "valueTitle": "söndagar"
+                }
+              ]
+            }       
+            
+### Statistics sleep [/mock/{customer_id}/goals/6756/statistics]
+Mock of goal statistics for sleep
+
+#### View statistics for a specific customer goal [GET]
+
++ Response 200 (application/json)
+
+            {
+              "currentProgressTitle": "-",
+              "currentProgressSubtitle": "timmar idag",
+              "currentGoalTitle": "8",
+              "currentGoalSubtitle": "dagens mål",
+              "graphStatistics": [
+                {
+                  "title": "Daglig",
+                  "values": [
+                    {
+                      "labelTitle": "M",
+                      "labelSubtitle": "21/1",
+                      "progress": 0.1
+                    },
+                    {
+                      "labelTitle": "T",
+                      "labelSubtitle": "22/1",
+                      "progress": 0.62
+                    }, {
+                      "labelTitle": "O",
+                      "labelSubtitle": "23/1",
+                      "progress": 0.46
+                    }, {
+                      "labelTitle": "T",
+                      "labelSubtitle": "24/1",
+                      "progress": 0.68
+                    }, {
+                      "labelTitle": "F",
+                      "labelSubtitle": "25/1",
+                      "progress": 0.96
+                    }, {
+                      "labelTitle": "L",
+                      "labelSubtitle": "26/1",
+                      "progress": 1.6
+                    }, {
+                      "labelTitle": "S",
+                      "labelSubtitle": "27/1",
+                      "progress": 0
+                    }
+                  ]
+                },
+                {
+                  "title": "Veckovis",
+                  "values": [
+                      {
+                        "labelTitle": "M",
+                        "labelSubtitle": "1/1",
+                        "progress": 0.2
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "2/1",
+                        "progress": 0.72
+                      }, {
+                        "labelTitle": "O",
+                        "labelSubtitle": "3/1",
+                        "progress": 0.26
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "4/1",
+                        "progress": 0.78
+                      }, {
+                        "labelTitle": "F",
+                        "labelSubtitle": "5/1",
+                        "progress": 1.2
+                      }, {
+                        "labelTitle": "L",
+                        "labelSubtitle": "6/1",
+                        "progress": 0.5
+                      }, {
+                        "labelTitle": "S",
+                        "labelSubtitle": "7/1",
+                        "progress": 2.0
+                      }, {
+                        "labelTitle": "M",
+                        "labelSubtitle": "8/1",
+                        "progress": 0.9
+                      }
+                  ]
+                },
+                {
+                  "title": "Månadsvis",
+                  "values": [
+                    {
+                        "labelTitle": "M",
+                        "labelSubtitle": "1/2",
+                        "progress": 1.2
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "2/2",
+                        "progress": 1.3
+                      }, {
+                        "labelTitle": "O",
+                        "labelSubtitle": "3/2",
+                        "progress": 1.4
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "4/2",
+                        "progress": 1.5
+                      }, {
+                        "labelTitle": "F",
+                        "labelSubtitle": "5/2",
+                        "progress": 1.6
+                      }, {
+                        "labelTitle": "L",
+                        "labelSubtitle": "6/2",
+                        "progress": 1.7
+                      }, {
+                        "labelTitle": "S",
+                        "labelSubtitle": "7/2",
+                        "progress": 1.8
+                      }, {
+                        "labelTitle": "M",
+                        "labelSubtitle": "8/2",
+                        "progress": 1.9
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "9/2",
+                        "progress": 2.0
+                      }, {
+                        "labelTitle": "O",
+                        "labelSubtitle": "10/2",
+                        "progress": 1.0
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "11/2",
+                        "progress": 1.0
+                      }, {
+                        "labelTitle": "F",
+                        "labelSubtitle": "12/2",
+                        "progress": 0.1
+                      }, {
+                        "labelTitle": "L",
+                        "labelSubtitle": "13/2",
+                        "progress": 0.0
+                      }, {
+                        "labelTitle": "S",
+                        "labelSubtitle": "14/2",
+                        "progress": 0.0
+                      },{
+                        "labelTitle": "M",
+                        "labelSubtitle": "15/2",
+                        "progress": 0.1
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "16/2",
+                        "progress": 0.5
+                      }, {
+                        "labelTitle": "O",
+                        "labelSubtitle": "17/2",
+                        "progress": 0.6
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "18/2",
+                        "progress": 0.7
+                      }, {
+                        "labelTitle": "F",
+                        "labelSubtitle": "19/2",
+                        "progress": 0.8
+                      }
+                  ]
+                }
+              ],
+              "funFacts": [
+                {
+                  "title": "Timmar per dygn",
+                  "subTitle": "Snitt under maj",
+                  "valueTitle": "7.5"
+                }, {
+                 "title": "Jag sover som ett barn på",
+                 "subTitle": "Under maj",
+                 "valueTitle": "Torsdagar"
+                }, {
+                 "title": "Jag behöver kaffe på",
+                  "subTitle": "Under maj",
+                  "valueTitle": "Måndagar"
+                }
+              ]
+            }
+            
+            
+
+# Group Health Attribute Mock endpoint
+Handling of health attributes. Possible values for measurable are as follows...
+Measurable:   **weight_distribution**   **waist**   **bmi**   **weight**   
+
+## Health Attribute [/mock/{customer_id}/healthattributes]
+
+### View health attributes for a customer [GET]
+
++ Response 200 (application/json)
+        
+        [
+            {
+            "id": 104,
+            "measurable": "weight",
+            "valueCategory": "",
+            "title": "Vikt",
+            "subtitles": [
+              "76 kg just nu"
+            ],
+                "statistics": [
+                  {
+                    "labelTitle": "L",
+                    "labelSubtitle": "21/1",
+                    "progress": 0.8
+                  },
+                  {
+                    "labelTitle": "S",
+                    "labelSubtitle": "22/1",
+                    "progress": 0.85
+                  },
+                  {
+                    "labelTitle": "M",
+                    "labelSubtitle": "23/1",
+                    "progress": 0.9
+                  },
+                  {
+                    "labelTitle": "T",
+                    "labelSubtitle": "24/1",
+                    "progress": 0.95
+                  },
+                  {
+                    "labelTitle": "O",
+                    "labelSubtitle": "25/1",
+                    "progress": 1.0
+                  },
+                  {
+                    "labelTitle": "T",
+                    "labelSubtitle": "26/1",
+                    "progress": 1.05
+                  },
+                {   
+                    "labelTitle": "F",
+                    "labelSubtitle": "27/1",
+                    "progress": 1.1
+                  }
+                ]
+          },
+          {
+            "id": 103,
+            "measurable": "waist",
+            "valueCategory": "",
+            "title": "Midjemått",
+            "subtitles": [
+              "För närvarande 82 cm"
+            ],
+                "statistics": [
+                  {
+                    "labelTitle": "L",
+                    "labelSubtitle": "21/1",
+                    "progress": 1.6
+                  },
+                  {
+                    "labelTitle": "S",
+                    "labelSubtitle": "22/1",
+                    "progress": 1.4
+                  },
+                  {
+                    "labelTitle": "M",
+                    "labelSubtitle": "23/1",
+                    "progress": 1.5
+                  },
+                  {
+                    "labelTitle": "T",
+                    "labelSubtitle": "24/1",
+                    "progress": 1.3
+                  },
+                  {
+                    "labelTitle": "O",
+                    "labelSubtitle": "25/1",
+                    "progress": 1.2
+                  },
+                  {
+                    "labelTitle": "T",
+                    "labelSubtitle": "26/1",
+                    "progress": 1.1
+                  },
+                {   
+                    "labelTitle": "F",
+                    "labelSubtitle": "27/1",
+                    "progress": 0.9
+                  }
+                ]
+          },
+          {
+            "id": 102,
+            "measurable": "bmi",
+            "valueCategory": "",
+            "title": "BMI",
+            "subtitles": [
+              "24,1"
+            ],
+            "statistics": [
+                  {
+                    "labelTitle": "L",
+                    "labelSubtitle": "21/1",
+                    "progress": 1.2
+                  },
+                  {
+                    "labelTitle": "S",
+                    "labelSubtitle": "22/1",
+                    "progress": 1.4
+                  },
+                  {
+                    "labelTitle": "M",
+                    "labelSubtitle": "23/1",
+                    "progress": 1.6
+                  },
+                  {
+                    "labelTitle": "T",
+                    "labelSubtitle": "24/1",
+                    "progress": 1.2
+                  },
+                  {
+                    "labelTitle": "O",
+                    "labelSubtitle": "25/1",
+                    "progress": 1.0
+                  },
+                  {
+                    "labelTitle": "T",
+                    "labelSubtitle": "26/1",
+                    "progress": 1.1
+                  },
+                {   
+                    "labelTitle": "F",
+                    "labelSubtitle": "27/1",
+                    "progress": 0.9
+                  }
+                ]
+          },
+         {
+            "id": 101,
+            "measurable": "weight_distribution",
+            "valueCategory": "",
+            "title": "Viktfördelning",
+            "subtitles": [
+              "Fettfri massa 47kg",
+              "Fettprocent 23%"
+            ],
+            "statistics": [ {
+                    "labelTitle": "L",
+                    "labelSubtitle": "21/1",
+                    "progress": 1.2
+                  },
+                  {
+                    "labelTitle": "S",
+                    "labelSubtitle": "22/1",
+                    "progress": 1.4
+                  },
+                  {
+                    "labelTitle": "M",
+                    "labelSubtitle": "23/1",
+                    "progress": 1.6
+                  },
+                  {
+                    "labelTitle": "T",
+                    "labelSubtitle": "24/1",
+                    "progress": 1.2
+                  },
+                  {
+                    "labelTitle": "O",
+                    "labelSubtitle": "25/1",
+                    "progress": 1.0
+                  },
+                  {
+                    "labelTitle": "T",
+                    "labelSubtitle": "26/1",
+                    "progress": 1.1
+                  },
+                {   
+                    "labelTitle": "F",
+                    "labelSubtitle": "27/1",
+                    "progress": 0.9
+                  }
+                ]
+          }
+            
+        ]
+
+
+# Group Statistics for Health data Mock endpoint
+
+### Statistics Weight [/mock/{customer_id}/healthattributes/104/statistics]
+Mock of health data statistics
+
+#### View statistics for a specific health attribute [GET]
+
++ Response 200 (application/json)
+
+            {
+              "currentProgressTitle": "90",
+              "currentProgressSubtitle": "Min vikt(kg)",
+              "currentGoalTitle": "81",
+              "currentGoalSubtitle": "Mitt mål(kg)",
+              "graphStatistics": [
+                {
+                  "title": "Daglig",
+                  "values": [
+                    {
+                      "labelTitle": "21/1",
+                      "labelSubtitle": "21/1",
+                      "progress": 1.2
+                    },
+                    {
+                      "labelTitle": "22/1",
+                      "labelSubtitle": "22/1",
+                      "progress": 1.3
+                    }, {
+                      "labelTitle": "23/1",
+                      "labelSubtitle": "23/1",
+                      "progress": 1.2
+                    }, {
+                      "labelTitle": "24/1",
+                      "labelSubtitle": "24/1",
+                      "progress": 1.0
+                    }, {
+                      "labelTitle": "25/1",
+                      "labelSubtitle": "25/1",
+                      "progress": 0.96
+                    }, {
+                      "labelTitle": "26/1",
+                      "labelSubtitle": "26/1",
+                      "progress": 1.1
+                    }, {
+                      "labelTitle": "27/1",
+                      "labelSubtitle": "27/1",
+                      "progress": 1.0
+                    }
+                    ],
+                    "values_itrim": [
+                    {
+                     "progress": 1.1
+                    },
+                    {
+                      "progress": 1.1
+                    }, {
+                      
+                      "progress": 1.1
+                    }, {
+                    
+                      "progress": 1.1
+                    }, {
+                      
+                      "progress": 1.1
+                    }, {
+                      
+                      "progress": 1.1
+                    }, {
+                      
+                      "progress": 1.1
+                    }
+                  ]
+                },
+                {
+                  "title": "Veckovis",
+                  "values": [
+                      {
+                        "labelTitle": "v31",
+                        "labelSubtitle": "1/1",
+                        "progress": 1.1
+                      }, {
+                        "labelTitle": "v32",
+                        "labelSubtitle": "2/1",
+                        "progress": 1.2
+                      }, {
+                        "labelTitle": "v33",
+                        "labelSubtitle": "3/1",
+                        "progress": 1.3
+                      }, {
+                        "labelTitle": "v34",
+                        "labelSubtitle": "4/1",
+                        "progress": 1.3
+                      }, {
+                        "labelTitle": "v35",
+                        "labelSubtitle": "5/1",
+                        "progress": 1.2
+                      }, {
+                        "labelTitle": "v36",
+                        "labelSubtitle": "6/1",
+                        "progress": 1.1
+                      }, {
+                        "labelTitle": "v37",
+                        "labelSubtitle": "7/1",
+                        "progress": 1.0
+                      }, {
+                        "labelTitle": "v38",
+                        "labelSubtitle": "8/1",
+                        "progress": 1.0
+                      }, {
+                        "labelTitle": "v39",
+                        "labelSubtitle": "9/1",
+                        "progress": 0.9
+                      }, {
+                        "labelTitle": "v40",
+                        "labelSubtitle": "10/1",
+                        "progress": 0.8
+                      }, {
+                        "labelTitle": "v41",
+                        "labelSubtitle": "11/1",
+                        "progress": 1.0
+                      }, {
+                        "labelTitle": "v42",
+                        "labelSubtitle": "12/1",
+                        "progress": 0.96
+                      }, {
+                        "labelTitle": "v43",
+                        "labelSubtitle": "13/1",
+                        "progress": 1.0
+                      }
+                  ],
+                      "values_itrim": [
+                      {
+                        
+                        "progress": 1.1
+                      }, {
+                        
+                        "progress": 1.1
+                      }, {
+                        
+                        "progress": 1.1
+                      }, {
+                       
+                        "progress": 1.1
+                      }, {
+                       
+                        "progress": 1.1
+                      }, {
+                 
+                        "progress": 1.1
+                      }, {
+                  
+                        "progress": 1.0
+                      }, {
+                    
+                        "progress": 1.0
+                      }, {
+                   
+                        "progress": 1.0
+                      }, {
+                       
+                        "progress": 1.0
+                      }, {
+                 
+                        "progress": 1.0
+                      }, {
+                      
+                        "progress": 1.0
+                      }, {
+                      
+                        "progress": 1.0
+                      }
+                  ]
+                },
+                {
+                  "title": "Månadsvis",
+                  "values": [
+                    {
+                        "labelTitle": "jan",
+                        "labelSubtitle": "1/2",
+                        "progress": 1.5
+                      }, {
+                        "labelTitle": "feb",
+                        "labelSubtitle": "2/2",
+                        "progress": 1.5
+                      }, {
+                        "labelTitle": "mar",
+                        "labelSubtitle": "3/2",
+                        "progress": 1.46
+                      }, {
+                        "labelTitle": "apr",
+                        "labelSubtitle": "4/2",
+                        "progress": 1.3
+                      }, {
+                        "labelTitle": "maj",
+                        "labelSubtitle": "5/2",
+                        "progress": 1.4
+                      }, {
+                        "labelTitle": "jun",
+                        "labelSubtitle": "6/2",
+                        "progress": 1.3
+                      }, {
+                        "labelTitle": "jul",
+                        "labelSubtitle": "7/2",
+                        "progress": 1.2
+                      }, {
+                        "labelTitle": "aug",
+                        "labelSubtitle": "8/2",
+                        "progress": 1.1
+                      }
+                  ],
+                   "values_itrim": [
+                    {
+                       
+                        "progress": 1.5
+                      }, {
+                       
+                        "progress": 1.5
+                      }, {
+                       
+                        "progress": 1.5
+                      }, {
+                       
+                        "progress": 1.3
+                      }, {
+                       
+                        "progress": 1.3
+                      }, {
+                      
+                        "progress": 1.3
+                      }, {
+                       
+                        "progress": 1.2
+                      }, {
+                       
+                        "progress": 1.2
+                      }
+                  ]
+                }
+              ],
+              "funFacts": [
+                {
+                  "title": "Sen senaste uppföljningen",
+                  "subTitle": "2015-02-13",
+                  "valueTitle": "+ 4.4"
+                }
+              ]
+            }
+
+### Statistics Weight Distrubution [/mock/{customer_id}/healthattributes/101/statistics]
+Mock of health data statistics
+
+#### View statistics for a specific health attribute [GET]
+
++ Response 200 (application/json)
+
+            {
+              "currentProgressTitle": "47",
+              "currentProgressSubtitle": "Fettfri massa(kg)",
+              "currentGoalTitle": "23",
+              "currentGoalSubtitle": "Fettprocent(%)",
+              "graphStatistics": [
+                {
+                  "title": "Veckovis",
+                  "values": [
+                      {
+                        "labelTitle": "M",
+                        "labelSubtitle": "1/1",
+                        "progress": 1.1
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "2/1",
+                        "progress": 1.62
+                      }, {
+                        "labelTitle": "O",
+                        "labelSubtitle": "3/1",
+                        "progress": 1.46
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "4/1",
+                        "progress": 1.68
+                      }, {
+                        "labelTitle": "F",
+                        "labelSubtitle": "5/1",
+                        "progress": 0.96
+                      }, {
+                        "labelTitle": "L",
+                        "labelSubtitle": "6/1",
+                        "progress": 1.6
+                      }, {
+                        "labelTitle": "S",
+                        "labelSubtitle": "7/1",
+                        "progress": 1.6
+                      }, {
+                        "labelTitle": "M",
+                        "labelSubtitle": "8/1",
+                        "progress": 1.1
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "9/1",
+                        "progress": 1.62
+                      }, {
+                        "labelTitle": "O",
+                        "labelSubtitle": "10/1",
+                        "progress": 1.46
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "11/1",
+                        "progress": 1.68
+                      }, {
+                        "labelTitle": "F",
+                        "labelSubtitle": "12/1",
+                        "progress": 0.96
+                      }, {
+                        "labelTitle": "L",
+                        "labelSubtitle": "13/1",
+                        "progress": 1.6
+                      }
+                  ]
+                },
+                {
+                  "title": "Månadsvis",
+                  "values": [
+                    {
+                        "labelTitle": "M",
+                        "labelSubtitle": "1/2",
+                        "progress": 1.1
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "2/2",
+                        "progress": 1.62
+                      }, {
+                        "labelTitle": "O",
+                        "labelSubtitle": "3/2",
+                        "progress": 1.46
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "4/2",
+                        "progress": 1.68
+                      }, {
+                        "labelTitle": "F",
+                        "labelSubtitle": "5/2",
+                        "progress": 0.96
+                      }, {
+                        "labelTitle": "L",
+                        "labelSubtitle": "6/2",
+                        "progress": 1.6
+                      }, {
+                        "labelTitle": "S",
+                        "labelSubtitle": "7/2",
+                        "progress": 1.6
+                      }, {
+                        "labelTitle": "M",
+                        "labelSubtitle": "8/2",
+                        "progress": 1.1
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "9/2",
+                        "progress": 1.62
+                      }, {
+                        "labelTitle": "O",
+                        "labelSubtitle": "10/2",
+                        "progress": 1.46
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "11/2",
+                        "progress": 1.68
+                      }, {
+                        "labelTitle": "F",
+                        "labelSubtitle": "12/2",
+                        "progress": 0.96
+                      }, {
+                        "labelTitle": "L",
+                        "labelSubtitle": "13/2",
+                        "progress": 1.0
+                      }, {
+                        "labelTitle": "S",
+                        "labelSubtitle": "14/2",
+                        "progress": 1.6
+                      },{
+                        "labelTitle": "M",
+                        "labelSubtitle": "15/2",
+                        "progress": 1.1
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "16/2",
+                        "progress": 1.62
+                      }, {
+                        "labelTitle": "O",
+                        "labelSubtitle": "17/2",
+                        "progress": 1.46
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "18/2",
+                        "progress": 1.68
+                      }, {
+                        "labelTitle": "F",
+                        "labelSubtitle": "19/2",
+                        "progress": 0.96
+                      }, {
+                        "labelTitle": "L",
+                        "labelSubtitle": "20/2",
+                        "progress": 1.0
+                      }
+                  ]
+                }
+              ],
+              "funFacts": [
+                {
+                  "title": "Förändring i senaste mätningen",
+                  "subTitle": "Fettprocent (%)",
+                  "valueTitle": "-4"
+                }, {
+                 "title": "Förändring i senaste mätningen",
+                 "subTitle": "Fettfri massa (kg)",
+                 "valueTitle": "0"
+                }
+              ]
+            }
+
+### Statistics Waist [/mock/{customer_id}/healthattributes/103/statistics]
+Mock of health data statistics
+
+#### View statistics for a specific health attribute [GET]
+
++ Response 200 (application/json)
+
+            {
+              "currentProgressTitle": "150",
+              "currentProgressSubtitle": "Mitt midjemått(cm)",
+              "currentGoalTitle": "",
+              "currentGoalSubtitle": "",
+              "graphStatistics": [
+                {
+                  "title": "Daglig",
+                  "values": [
+                    {
+                      "labelTitle": "21/1",
+                      "labelSubtitle": "21/1",
+                      "progress": 1.2
+                    },
+                    {
+                      "labelTitle": "22/1",
+                      "labelSubtitle": "22/1",
+                      "progress": 1.3
+                    }, {
+                      "labelTitle": "23/1",
+                      "labelSubtitle": "23/1",
+                      "progress": 1.2
+                    }, {
+                      "labelTitle": "24/1",
+                      "labelSubtitle": "24/1",
+                      "progress": 1.0
+                    }, {
+                      "labelTitle": "25/1",
+                      "labelSubtitle": "25/1",
+                      "progress": 0.96
+                    }, {
+                      "labelTitle": "26/1",
+                      "labelSubtitle": "26/1",
+                      "progress": 1.1
+                    }, {
+                      "labelTitle": "27/1",
+                      "labelSubtitle": "27/1",
+                      "progress": 1.0
+                    }
+                    ],
+                    "values_itrim": [
+                    {
+                      "labelTitle": "M",
+                      "labelSubtitle": "21/1",
+                      "progress": 1.1
+                    },
+                    {
+                      "labelTitle": "T",
+                      "labelSubtitle": "22/1",
+                      "progress": 1.1
+                    }, {
+                      "labelTitle": "O",
+                      "labelSubtitle": "23/1",
+                      "progress": 1.1
+                    }, {
+                      "labelTitle": "T",
+                      "labelSubtitle": "24/1",
+                      "progress": 1.1
+                    }, {
+                      "labelTitle": "F",
+                      "labelSubtitle": "25/1",
+                      "progress": 1.1
+                    }, {
+                      "labelTitle": "L",
+                      "labelSubtitle": "26/1",
+                      "progress": 1.1
+                    }, {
+                      "labelTitle": "S",
+                      "labelSubtitle": "27/1",
+                      "progress": 1.1
+                    }
+                  ]
+                },
+                {
+                  "title": "Veckovis",
+                  "values": [
+                      {
+                        "labelTitle": "v31",
+                        "labelSubtitle": "1/1",
+                        "progress": 1.1
+                      }, {
+                        "labelTitle": "v32",
+                        "labelSubtitle": "2/1",
+                        "progress": 1.2
+                      }, {
+                        "labelTitle": "v33",
+                        "labelSubtitle": "3/1",
+                        "progress": 1.3
+                      }, {
+                        "labelTitle": "v34",
+                        "labelSubtitle": "4/1",
+                        "progress": 1.3
+                      }, {
+                        "labelTitle": "v35",
+                        "labelSubtitle": "5/1",
+                        "progress": 1.2
+                      }, {
+                        "labelTitle": "v36",
+                        "labelSubtitle": "6/1",
+                        "progress": 1.1
+                      }, {
+                        "labelTitle": "v37",
+                        "labelSubtitle": "7/1",
+                        "progress": 1.0
+                      }, {
+                        "labelTitle": "v38",
+                        "labelSubtitle": "8/1",
+                        "progress": 1.0
+                      }, {
+                        "labelTitle": "v39",
+                        "labelSubtitle": "9/1",
+                        "progress": 0.9
+                      }, {
+                        "labelTitle": "v40",
+                        "labelSubtitle": "10/1",
+                        "progress": 0.8
+                      }, {
+                        "labelTitle": "v41",
+                        "labelSubtitle": "11/1",
+                        "progress": 1.0
+                      }, {
+                        "labelTitle": "v42",
+                        "labelSubtitle": "12/1",
+                        "progress": 0.96
+                      }, {
+                        "labelTitle": "v43",
+                        "labelSubtitle": "13/1",
+                        "progress": 1.0
+                      }
+                  ],
+                      "values_itrim": [
+                      {
+                        "labelTitle": "v31",
+                        "labelSubtitle": "1/1",
+                        "progress": 1.1
+                      }, {
+                        "labelTitle": "v32",
+                        "labelSubtitle": "2/1",
+                        "progress": 1.1
+                      }, {
+                        "labelTitle": "v33",
+                        "labelSubtitle": "3/1",
+                        "progress": 1.1
+                      }, {
+                        "labelTitle": "v34",
+                        "labelSubtitle": "4/1",
+                        "progress": 1.1
+                      }, {
+                        "labelTitle": "v35",
+                        "labelSubtitle": "5/1",
+                        "progress": 1.1
+                      }, {
+                        "labelTitle": "v36",
+                        "labelSubtitle": "6/1",
+                        "progress": 1.1
+                      }, {
+                        "labelTitle": "v37",
+                        "labelSubtitle": "7/1",
+                        "progress": 1.0
+                      }, {
+                        "labelTitle": "v38",
+                        "labelSubtitle": "8/1",
+                        "progress": 1.0
+                      }, {
+                        "labelTitle": "v39",
+                        "labelSubtitle": "9/1",
+                        "progress": 1.0
+                      }, {
+                        "labelTitle": "v40",
+                        "labelSubtitle": "10/1",
+                        "progress": 1.0
+                      }, {
+                        "labelTitle": "v41",
+                        "labelSubtitle": "11/1",
+                        "progress": 1.0
+                      }, {
+                        "labelTitle": "v42",
+                        "labelSubtitle": "12/1",
+                        "progress": 1.0
+                      }, {
+                        "labelTitle": "v43",
+                        "labelSubtitle": "13/1",
+                        "progress": 1.0
+                      }
+                  ]
+                },
+                {
+                  "title": "Månadsvis",
+                  "values": [
+                    {
+                        "labelTitle": "jan",
+                        "labelSubtitle": "1/2",
+                        "progress": 1.5
+                      }, {
+                        "labelTitle": "feb",
+                        "labelSubtitle": "2/2",
+                        "progress": 1.5
+                      }, {
+                        "labelTitle": "mar",
+                        "labelSubtitle": "3/2",
+                        "progress": 1.46
+                      }, {
+                        "labelTitle": "apr",
+                        "labelSubtitle": "4/2",
+                        "progress": 1.3
+                      }, {
+                        "labelTitle": "maj",
+                        "labelSubtitle": "5/2",
+                        "progress": 1.4
+                      }, {
+                        "labelTitle": "jun",
+                        "labelSubtitle": "6/2",
+                        "progress": 1.3
+                      }, {
+                        "labelTitle": "jul",
+                        "labelSubtitle": "7/2",
+                        "progress": 1.2
+                      }, {
+                        "labelTitle": "aug",
+                        "labelSubtitle": "8/2",
+                        "progress": 1.1
+                      }
+                  ],
+                   "values_itrim": [
+                    {
+                        "labelTitle": "jan",
+                        "labelSubtitle": "1/2",
+                        "progress": 1.5
+                      }, {
+                        "labelTitle": "feb",
+                        "labelSubtitle": "2/2",
+                        "progress": 1.5
+                      }, {
+                        "labelTitle": "mar",
+                        "labelSubtitle": "3/2",
+                        "progress": 1.5
+                      }, {
+                        "labelTitle": "apr",
+                        "labelSubtitle": "4/2",
+                        "progress": 1.3
+                      }, {
+                        "labelTitle": "maj",
+                        "labelSubtitle": "5/2",
+                        "progress": 1.3
+                      }, {
+                        "labelTitle": "jun",
+                        "labelSubtitle": "6/2",
+                        "progress": 1.3
+                      }, {
+                        "labelTitle": "jul",
+                        "labelSubtitle": "7/2",
+                        "progress": 1.2
+                      }, {
+                        "labelTitle": "aug",
+                        "labelSubtitle": "8/2",
+                        "progress": 1.2
+                      }
+                  ]
+                }
+              ],
+              "funFacts": [
+                {
+                  "title": "Sen senaste uppföljningen",
+                  "subTitle": "2015-06-12",
+                  "valueTitle": "-4"
+                }, {
+                 "title": "Totalt sedan start",
+                 "subTitle": "cm",
+                 "valueTitle": "-10"
+                }
+              ]
+            }
+
+### Statistics BMI [/mock/{customer_id}/healthattributes/102/statistics]
+Mock of health data statistics
+
+#### View statistics for a specific health attribute [GET]
+
++ Response 200 (application/json)
+
+            {
+              "currentProgressTitle": "27",
+              "currentProgressSubtitle": "Mitt BMI",
+              "currentGoalTitle": "25",
+              "currentGoalSubtitle": "Mitt mål",
+              "graphStatistics": [
+                {
+                  "title": "Daglig",
+                  "values": [
+                    {
+                      "labelTitle": "M",
+                      "labelSubtitle": "21/1",
+                      "progress": 0.1
+                    },
+                    {
+                      "labelTitle": "T",
+                      "labelSubtitle": "22/1",
+                      "progress": 1.62
+                    }, {
+                      "labelTitle": "O",
+                      "labelSubtitle": "23/1",
+                      "progress": 1.46
+                    }, {
+                      "labelTitle": "T",
+                      "labelSubtitle": "24/1",
+                      "progress": 1.4
+                    }, {
+                      "labelTitle": "F",
+                      "labelSubtitle": "25/1",
+                      "progress": 1.3
+                    }, {
+                      "labelTitle": "L",
+                      "labelSubtitle": "26/1",
+                      "progress": 1.2
+                    }, {
+                      "labelTitle": "S",
+                      "labelSubtitle": "27/1",
+                      "progress": 1.2
+                    }
+                  ]
+                },
+                {
+                  "title": "Veckovis",
+                  "values": [
+                      {
+                        "labelTitle": "M",
+                        "labelSubtitle": "1/1",
+                        "progress": 0.1
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "2/1",
+                        "progress": 0.62
+                      }, {
+                        "labelTitle": "O",
+                        "labelSubtitle": "3/1",
+                        "progress": 0.46
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "4/1",
+                        "progress": 0.68
+                      }, {
+                        "labelTitle": "F",
+                        "labelSubtitle": "5/1",
+                        "progress": 0.96
+                      }, {
+                        "labelTitle": "L",
+                        "labelSubtitle": "6/1",
+                        "progress": 1.6
+                      }, {
+                        "labelTitle": "S",
+                        "labelSubtitle": "7/1",
+                        "progress": 1.6
+                      }, {
+                        "labelTitle": "M",
+                        "labelSubtitle": "8/1",
+                        "progress": 0.1
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "9/1",
+                        "progress": 0.62
+                      }, {
+                        "labelTitle": "O",
+                        "labelSubtitle": "10/1",
+                        "progress": 0.46
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "11/1",
+                        "progress": 0.68
+                      }, {
+                        "labelTitle": "F",
+                        "labelSubtitle": "12/1",
+                        "progress": 0.96
+                      }, {
+                        "labelTitle": "L",
+                        "labelSubtitle": "13/1",
+                        "progress": 1.6
+                      }
+                  ]
+                },
+                {
+                  "title": "Månadsvis",
+                  "values": [
+                    {
+                        "labelTitle": "M",
+                        "labelSubtitle": "1/2",
+                        "progress": 0.1
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "2/2",
+                        "progress": 0.62
+                      }, {
+                        "labelTitle": "O",
+                        "labelSubtitle": "3/2",
+                        "progress": 0.46
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "4/2",
+                        "progress": 0.68
+                      }, {
+                        "labelTitle": "F",
+                        "labelSubtitle": "5/2",
+                        "progress": 0.96
+                      }, {
+                        "labelTitle": "L",
+                        "labelSubtitle": "6/2",
+                        "progress": 1.6
+                      }, {
+                        "labelTitle": "S",
+                        "labelSubtitle": "7/2",
+                        "progress": 1.6
+                      }, {
+                        "labelTitle": "M",
+                        "labelSubtitle": "8/2",
+                        "progress": 0.1
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "9/2",
+                        "progress": 0.62
+                      }, {
+                        "labelTitle": "O",
+                        "labelSubtitle": "10/2",
+                        "progress": 0.46
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "11/2",
+                        "progress": 0.68
+                      }, {
+                        "labelTitle": "F",
+                        "labelSubtitle": "12/2",
+                        "progress": 0.96
+                      }, {
+                        "labelTitle": "L",
+                        "labelSubtitle": "13/2",
+                        "progress": 1.6
+                      }, {
+                        "labelTitle": "S",
+                        "labelSubtitle": "14/2",
+                        "progress": 2.6
+                      },{
+                        "labelTitle": "M",
+                        "labelSubtitle": "15/2",
+                        "progress": 1.1
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "16/2",
+                        "progress": 0.62
+                      }, {
+                        "labelTitle": "O",
+                        "labelSubtitle": "17/2",
+                        "progress": 0.46
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "18/2",
+                        "progress": 0.68
+                      }
+                  ]
+                }
+              ],
+              "funFacts": [
+                {
+                  "title": "Sen sensate uppföljningen",
+                  "subTitle": "2015-06-12",
+                  "valueTitle": "+2"
+                }
+              ]
+            }
+            
+            
+### Statistics Custom [/mock/{customer_id}/goals/8001/statistics]
+Mock of goal statistics for custom goal
+
+#### View statistics for a specific customer goal [GET]
+
++ Response 200 (application/json)
+
+            {
+              "currentProgressTitle": "3",
+              "currentProgressSubtitle": "Denna vecka",
+              "currentGoalTitle": "4",
+              "currentGoalSubtitle": "Veckans mål",
+              "graphStatistics": [
+                {
+                  "title": "Daglig",
+                  "values": [
+                    {
+                      "labelTitle": "M",
+                      "labelSubtitle": "21/1",
+                      "progress": 0.0
+                    },
+                    {
+                      "labelTitle": "T",
+                      "labelSubtitle": "22/1",
+                      "progress": 1.0
+                    }, {
+                      "labelTitle": "O",
+                      "labelSubtitle": "23/1",
+                      "progress": 1.0
+                    }, {
+                      "labelTitle": "T",
+                      "labelSubtitle": "24/1",
+                      "progress": 0.0
+                    }, {
+                      "labelTitle": "F",
+                      "labelSubtitle": "25/1",
+                      "progress": 1.0
+                    }, {
+                      "labelTitle": "L",
+                      "labelSubtitle": "26/1",
+                      "progress": 1.0
+                    }, {
+                      "labelTitle": "S",
+                      "labelSubtitle": "27/1",
+                      "progress": 1.0
+                    }
+                  ]
+                },
+                {
+                  "title": "Veckovis",
+                  "values": [
+                      {
+                        "labelTitle": "M",
+                        "labelSubtitle": "1/1",
+                        "progress": 0.2
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "2/1",
+                        "progress": 0.72
+                      }, {
+                        "labelTitle": "O",
+                        "labelSubtitle": "3/1",
+                        "progress": 0.26
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "4/1",
+                        "progress": 0.78
+                      }
+                  ]
+                },
+                {
+                  "title": "Månadsvis",
+                  "values": [
+                    {
+                        "labelTitle": "M",
+                        "labelSubtitle": "1/2",
+                        "progress": 1.2
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "2/2",
+                        "progress": 1.3
+                      }, {
+                        "labelTitle": "O",
+                        "labelSubtitle": "3/2",
+                        "progress": 1.4
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "4/2",
+                        "progress": 1.5
+                      }, {
+                        "labelTitle": "F",
+                        "labelSubtitle": "5/2",
+                        "progress": 1.6
+                      }, {
+                        "labelTitle": "L",
+                        "labelSubtitle": "6/2",
+                        "progress": 1.7
+                      }, {
+                        "labelTitle": "S",
+                        "labelSubtitle": "7/2",
+                        "progress": 1.8
+                      }, {
+                        "labelTitle": "M",
+                        "labelSubtitle": "8/2",
+                        "progress": 1.9
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "9/2",
+                        "progress": 2.0
+                      }, {
+                        "labelTitle": "O",
+                        "labelSubtitle": "10/2",
+                        "progress": 1.0
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "11/2",
+                        "progress": 1.0
+                      }, {
+                        "labelTitle": "F",
+                        "labelSubtitle": "12/2",
+                        "progress": 0.1
+                      }, {
+                        "labelTitle": "L",
+                        "labelSubtitle": "13/2",
+                        "progress": 0.0
+                      }
+                  ]
+                }
+              ],
+              "funFacts": [
+                {
+                  "title": "Snitt per vecka",
+                  "subTitle": "Under maj",
+                  "valueTitle": "3"
+                }
+              ]
+            }
+            
+### Statistics CustomTwo [/mock/{customer_id}/goals/8002/statistics]
+Mock of goal statistics for custom goal
+
+#### View statistics for a specific customer goal [GET]
+
++ Response 200 (application/json)
+
+            {
+              "currentProgressTitle": "-",
+              "currentProgressSubtitle": "gjort din aktivtet idag",
+              "currentGoalTitle": "",
+              "currentGoalSubtitle": "",
+              "graphStatistics": [
+                {
+                  "title": "Vecka",
+                  "values": [
+                    {
+                      "labelTitle": "M",
+                      "labelSubtitle": "21/1",
+                      "progress": 0.0
+                    },
+                    {
+                      "labelTitle": "T",
+                      "labelSubtitle": "22/1",
+                      "progress": 1.0
+                    }, {
+                      "labelTitle": "O",
+                      "labelSubtitle": "23/1",
+                      "progress": 1.0
+                    }, {
+                      "labelTitle": "T",
+                      "labelSubtitle": "24/1",
+                      "progress": 0.0
+                    }, {
+                      "labelTitle": "F",
+                      "labelSubtitle": "25/1",
+                      "progress": 1.0
+                    }, {
+                      "labelTitle": "L",
+                      "labelSubtitle": "26/1",
+                      "progress": 1.0
+                    }, {
+                      "labelTitle": "S",
+                      "labelSubtitle": "27/1",
+                      "progress": 1.0
+                    }
+                  ]
+                },
+                {
+                  "title": "Månad",
+                  "values": [
+                      {
+                        "labelTitle": "M",
+                        "labelSubtitle": "1/1",
+                        "progress": 0.2
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "2/1",
+                        "progress": 0.72
+                      }, {
+                        "labelTitle": "O",
+                        "labelSubtitle": "3/1",
+                        "progress": 0.26
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "4/1",
+                        "progress": 0.78
+                      }
+                  ]
+                },
+                {
+                  "title": "Total",
+                  "values": [
+                    {
+                        "labelTitle": "M",
+                        "labelSubtitle": "1/2",
+                        "progress": 1.2
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "2/2",
+                        "progress": 1.3
+                      }, {
+                        "labelTitle": "O",
+                        "labelSubtitle": "3/2",
+                        "progress": 1.4
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "4/2",
+                        "progress": 1.5
+                      }, {
+                        "labelTitle": "F",
+                        "labelSubtitle": "5/2",
+                        "progress": 1.6
+                      }, {
+                        "labelTitle": "L",
+                        "labelSubtitle": "6/2",
+                        "progress": 1.7
+                      }, {
+                        "labelTitle": "S",
+                        "labelSubtitle": "7/2",
+                        "progress": 1.8
+                      }, {
+                        "labelTitle": "M",
+                        "labelSubtitle": "8/2",
+                        "progress": 1.9
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "9/2",
+                        "progress": 2.0
+                      }, {
+                        "labelTitle": "O",
+                        "labelSubtitle": "10/2",
+                        "progress": 1.0
+                      }, {
+                        "labelTitle": "T",
+                        "labelSubtitle": "11/2",
+                        "progress": 1.0
+                      }, {
+                        "labelTitle": "F",
+                        "labelSubtitle": "12/2",
+                        "progress": 0.1
+                      }
+                  ]
+                }
+              ],
+              "funFacts": [
+                {
+                  "title": "Lyckade dagar",
+                  "subTitle": "Maj månad",
+                  "valueTitle": "24"
+                }, {
+                 "title": "Bästa veckodag",
+                 "subTitle": "Maj månad",
+                 "valueTitle": "Onsdag"
+                }, {
+                 "title": "Sämsta veckodag",
+                  "subTitle": "Maj månad",
+                  "valueTitle": "Tisdag"
+                }
+              ]
+            }
+
+ 
+
+## Data Structures
+
+### Customer (object)
++ id
++ name
++ surname
++ contactInfo: ContactInfo
+
+### ContactInfo
++ phoneNo
++ facebookId
++ address
++ under_construction: `yes`
+
+### Goal (object)
++ id: 4321 (required, number)
++ measurable: meal (required, string)
++ valueCategory: vlcd (optional, string)
++ visible: true (required, boolean)
++ value: 0.8 (required, number) <!-- Value ranges between 0 and infinity where 1.0 is the normalized goal amount -->
++ from: `2015-05-01T00:00:00.123Z` (required, string)
++ to: `2015-05-31T23:59:99.123Z` (required, string)
++ title: Mat (required, string)
++ progressTitle: 6500 av 9000 (optional, string)
++ statistics (required, array[StatisticValue])
+
+### HealthAttribute (object)
++ id: 4321 (required, number)
++ measurable: weight_distribution (optional, string)
++ valueCategory: empty (optional, string)
++ title: Viktfördelning (required, string)
++ subtitles: Fettfri, Fettprocent (optional, [string])
++ statistics (optional, array[StatisticValue])
+
+### LogEvent (object)
++ id: 1336 (required, number)
++ measurable: meal (required, string)
++ value: 1.0 (required, number) <!-- Value ranges between 0 and infinity where 1.0 is the normalized goal amount -->
++ valueCategory: vlcd (optional, string)
++ timestamp: `2015-05-12T17:08:12.123Z` (required, string)
+
+### Statistics (object) <!-- Reused for health statistics -->
++ currentProgressTitle: 10 700 (optional, string)
++ currentProgressSubtitle: Steg idag (optional, string)
++ currentGoalTitle: 9 000 (optional, string)
++ currentGoalSubtitle: Dagens mål (optional, string)
++ graphStatistics (required, array[GraphStatistic])
++ funFacts (required, array[FunFact])
+
+### GraphStatistic (object)
++ title: Vecka (required, string)
++ values (required, array[StatisticValue])
+
+### FunFact (object)
++ title: Snitt/dag (required, string)
++ subTitle: Maj månad (optional, string)
++ valueTitle: 9 870 (required, string)
+
+### StatisticValue (object)
++ labelTitle: M (optional, string)
++ labelSubtitle: 21/1 (optional, string)
++ progress: 0.6 (required, number)  <!-- Value ranges between 0 and infinity where 1.0 is a normalized amount -->
+
+### Token (object)
++ type: APNS/GCM (required, string) <!-- Value can be either APNS (for iOs devices) or GCM (for android devices) -->
++ customer_id: 231241 (required, string)
+
+### Center
++ id (required, string)
++ address (required, string)
++ introduction (required, string)
++ lat (required, string)
++ long (required, string)
++ openingHours (required, OpeningHours)
++ telephone: 0278-24200 (required, string)
++ title: Itrim Bollnäs (required, string)
++ informationURL: `htts://itrim.se/center/bollnas` (required, string)
+
+### OpeningHours
++ friday: 07.00-20.00 (required, string)
++ monday: 07.00-22.00 (required, string)
++ saturday: 09.30-17.00 (required, string)
++ sunday: 09.30-17.00 (required, string)
++ thursday: 07.00-22.00 (required, string)
++ tuesday: 07.00-22.00 (required, string)
++ wednesday: 07.00-22.00 (required, string)
