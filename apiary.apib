@@ -46,8 +46,19 @@ Measurable meal:  **rapid_start**   **rapid**   **varied**   **palm_minus**   **
     + Headers
 
             Location: /{customer_id}/logs/{id}
+            
+### Retrieve logs for a goal [GET /{customer_id}/logs/{goal_id}]
+Retrieve logs for a certain goal
 
++ Request (application/json)
+    + Body
+            
+            {
+                "only_with_comments": true
+            }
 
++ Response 200 (application/json)
+    + Attributes (array[LogEvent])
 
 ## Goal [/{customer_id}/goals]
 Handling of goals. Possible values for measurable are as follows...
@@ -237,7 +248,28 @@ Measurable meal:    **rapid_start**   **rapid**   **varied**   **palm_minus**   
             Location: /{customer_id}/logs/{id}
 
 
+#### Retrieve logs for a goal [GET /{customer_id}/logs/{goal_id}]
+Retrieve logs for a certain goal
 
++ Request (application/json)
+    + Body
+            
+            {
+                "only_with_comments": true
+            }
+
++ Response 200 (application/json)
+
+            [
+            {
+                "comment": "comment one",
+                "timestamp": "2015-08-01T00:00:00.123Z"
+            },
+            {
+                "comment": "comment two",
+                "timestamp": "2015-08-01T00:00:00.123Z"
+            }
+            ]
 
 
 # Group Goals Mock endpoint
@@ -3199,8 +3231,14 @@ Mock of goal statistics for custom goal
 ### LogEvent (object)
 + id: 1336 (required, number)
 + measurable: meal (required, string)
++ comments (optional, array[Comment])
 + value: 1.0 (required, number) <!-- Value ranges between 0 and infinity where 1.0 is the normalized goal amount -->
 + valueCategory: vlcd (optional, string)
++ goal (optional, Goal)
++ timestamp: `2015-05-12T17:08:12.123Z` (required, string)
+
+### Comment (object)
++ comment: Först gick det bra, sen blev det jobbigt... (required, string)
 + timestamp: `2015-05-12T17:08:12.123Z` (required, string)
 
 ### Statistics (object) <!-- Reused for health statistics -->
