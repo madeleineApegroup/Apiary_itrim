@@ -47,15 +47,12 @@ Measurable meal:  **rapid_start**   **rapid**   **varied**   **palm_minus**   **
 
             Location: /{customer_id}/logs/{id}
             
-### Retrieve logs for a goal [GET /{customer_id}/logs/{goal_id}]
+### Retrieve logs for a goal [GET /{customer_id}/logs/]
 Retrieve logs for a certain goal
 
-+ Request (application/json)
-    + Body
-            
-            {
-                "only_with_comments": true
-            }
++ Parameters
+    + Attributes
+        
 
 + Response 200 (application/json)
     + Attributes (array[LogEvent])
@@ -261,14 +258,68 @@ Retrieve logs for a certain goal
 + Response 200 (application/json)
 
             [
-            {
-                "comment": "comment one",
-                "timestamp": "2015-08-01T00:00:00.123Z"
-            },
-            {
-                "comment": "comment two",
-                "timestamp": "2015-08-01T00:00:00.123Z"
-            }
+              {
+                "id": 1336,
+                "measurable": "meal",
+                "comments": [
+                  {
+                    "comment": "Först gick det bra, sen blev det jobbigt...",
+                    "timestamp": "2015-05-12T17:08:12.123Z"
+                  }
+                ],
+                "value": 1,
+                "valueCategory": "vlcd",
+                "goal": {
+                  "id": 4321,
+                  "measurable": "meal",
+                  "valueCategory": "vlcd",
+                  "visible": true,
+                  "value": 0.8,
+                  "from": "2015-05-01T00:00:00.123Z",
+                  "to": "2015-05-31T23:59:99.123Z",
+                  "title": "Mat",
+                  "progressTitle": "6500 av 9000",
+                  "statistics": [
+                    {
+                      "labelTitle": "M",
+                      "labelSubtitle": "21/1",
+                      "progress": 0.6
+                    }
+                  ]
+                },
+                "timestamp": "2015-05-12T17:08:12.123Z"
+              },
+                           {
+                "id": 1336,
+                "measurable": "meal",
+                "comments": [
+                  {
+                    "comment": "Först gick det bra, sen blev det jobbigt...",
+                    "timestamp": "2015-05-12T17:08:12.123Z"
+                  }
+                ],
+                "value": 1,
+                "valueCategory": "vlcd",
+                "goal": {
+                  "id": 4321,
+                  "measurable": "meal",
+                  "valueCategory": "vlcd",
+                  "visible": true,
+                  "value": 0.8,
+                  "from": "2015-05-01T00:00:00.123Z",
+                  "to": "2015-05-31T23:59:99.123Z",
+                  "title": "Mat",
+                  "progressTitle": "6500 av 9000",
+                  "statistics": [
+                    {
+                      "labelTitle": "M",
+                      "labelSubtitle": "21/1",
+                      "progress": 0.6
+                    }
+                  ]
+                },
+                "timestamp": "2015-05-12T17:08:12.123Z"
+              }
             ]
 
 
@@ -3231,7 +3282,7 @@ Mock of goal statistics for custom goal
 ### LogEvent (object)
 + id: 1336 (required, number)
 + measurable: meal (required, string)
-+ comments (optional, array[Comment])
++ description: Det gick lätt i början, sen trögt! (optional, string)
 + value: 1.0 (required, number) <!-- Value ranges between 0 and infinity where 1.0 is the normalized goal amount -->
 + valueCategory: vlcd (optional, string)
 + goal (optional, Goal)
