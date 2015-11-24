@@ -47,19 +47,20 @@ Measurable meal:  **rapid_start**   **rapid**   **varied**   **palm_minus**   **
 
             Location: /{customer_id}/logs/{id}
             
-### Retrieve logs for a goal [GET /{customer_id}/logs{?activity}{?type}{?from}{?to}{?resolution}{?limit}{?skip}]
+### Retrieve logs for a goal [GET /{customer_id}/logs{?measurable}{?sort}{?start}{?stop}{?limit}{?skip}{?includeGoal}{?requireDescription}]
 
 + Parameters
-    + activity (optional, string) - Filter on activity
-    + type (optional, string, `circle`) - Filter on activity type
-    + from (optional, date, `1970-01-01T00:00:00.000Z`)
-    + to (optional, date, `2015-05-13T18:08:12.123Z`)
-    + resolution (optional, number) - Use a resolution of the given days
+    + measurable: training (optional, string) - Filter on measurable (comma separet for multiple measurables)
+    + sort: 'asc' (optional, string)
     + limit (optional, number) - Maximum number of entries to return
-        + Default: '10'
-    + skip (optional, number) - number of items to skip
-        + Default: '0'
-Retrieve logs for a certain goal
+        + Default: 100
+    + skip (optional, number) - Number of items to skip
+        + Default: 0
+    + start (required, date, `1970-01-01T00:00:00.000Z`)
+    + stop (required, date, `2015-05-13T18:08:12.123Z`)
+    + includeGoal: true (optional, boolean) - Include goal in result?
+    + requireDescription: true (optional, boolean) - Only logs that has a description?
+Retrieve logs
 
 + Response 200 (application/json)
     + Attributes (array[LogEvent])
