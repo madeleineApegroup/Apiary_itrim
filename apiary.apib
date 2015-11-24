@@ -63,7 +63,7 @@ Measurable meal:  **rapid_start**   **rapid**   **varied**   **palm_minus**   **
 Retrieve logs
 
 + Response 200 (application/json)
-    + Attributes (array[LogEvent])
+    + Attributes (array[LogEventWithGoal])
 
 ## Goal [/{customer_id}/goals]
 Handling of goals. Possible values for measurable are as follows...
@@ -3279,6 +3279,17 @@ Mock of goal statistics for custom goal
 + progressTitle: 6500 av 9000 (optional, string)
 + statistics (required, array[StatisticValue])
 
+### RawGoal (object)
++ id: 4321 (required, number)
++ measurable: meal (required, string)
++ valueCategory: vlcd (optional, string)
++ visible: true (required, boolean)
++ value: 0.8 (required, number) <!-- Value ranges between 0 and infinity where 1.0 is the normalized goal amount -->
++ from: `2015-05-01T00:00:00.123Z` (required, string)
++ to: `2015-05-31T23:59:99.123Z` (required, string)
++ title: Mat (required, string)
++ progressTitle: 6500 av 9000 (optional, string)
+
 ### HealthAttribute (object)
 + id: 4321 (required, number)
 + measurable: weight_distribution (optional, string)
@@ -3294,6 +3305,15 @@ Mock of goal statistics for custom goal
 + value: 1.0 (required, number) <!-- Value ranges between 0 and infinity where 1.0 is the normalized goal amount -->
 + valueCategory: vlcd (optional, string)
 + timestamp: `2015-05-12T17:08:12.123Z` (required, string)
+
+### LogEventWithGoal
++ id: 1336 (required, number)
++ measurable: meal (required, string)
++ description: Det gick lätt i början, sen trögt! (optional, string)
++ value: 1.0 (required, number) <!-- Value ranges between 0 and infinity where 1.0 is the normalized goal amount -->
++ valueCategory: vlcd (optional, string)
++ timestamp: `2015-05-12T17:08:12.123Z` (required, string)
++ goal (optional, RawGoal)
 
 ### Comment (object)
 + comment: Först gick det bra, sen blev det jobbigt... (required, string)
