@@ -225,21 +225,86 @@ Measurable training:   **pt**   **circle**   **other**
 
 Measurable meal:    **rapid_start**   **rapid**   **varied**   **palm_minus**   **palm** **palm_plus** 
 
-<!--### Retrieve log details for a customer [GET /{customer_id}/logs{?activity}{?type}{?from}{?to}{?resolution}{?limit}{?skip}]
+#### Retrieve logs for a goal [GET /{customer_id}/logs{?measurable}{?sort}{?start}{?stop}{?limit}{?skip}{?includeGoal}{?requireDescription}]
 
 + Parameters
-    + activity (optional, string) - Filter on activity
-    + type (optional, string, `circle`) - Filter on activity type
-    + from (optional, date, `1970-01-01T00:00:00.000Z`)
-    + to (optional, date, `2015-05-13T18:08:12.123Z`)
-    + resolution (optional, number) - Use a resolution of the given days
+    + measurable: training (optional, string) - Filter on measurable (comma separated for multiple measurables)
+    + sort: asc (optional, string)
     + limit (optional, number) - Maximum number of entries to return
-        + Default: '10'
-    + skip (optional, number) - number of items to skip
-        + Default: '0'
+        + Default: 100
+    + skip (optional, number) - Number of items to skip
+        + Default: 0
+    + start (required, date, `1970-01-01T00:00:00.000Z`)
+    + stop (required, date, `2015-05-13T18:08:12.123Z`)
+    + includeGoal: true (optional, boolean) - Include goal in result?
+    + requireDescription: true (optional, boolean) - Only logs that has a description?
+Retrieve logs
 
 + Response 200 (application/json)
-    + Attributes (array[Log Event])-->
+    
+            [
+              {
+                "id": 1336,
+                "measurable": "meal",
+                "description": "Det gick lätt i början, sen trögt!",
+                "value": 1,
+                "valueCategory": "vlcd",
+                "timestamp": "2015-05-12T17:08:12.123Z",
+                "goal": {
+                  "id": 4321,
+                  "measurable": "meal",
+                  "valueCategory": "vlcd",
+                  "visible": true,
+                  "value": 0.8,
+                  "from": "2015-05-01T00:00:00.123Z",
+                  "to": "2015-05-31T23:59:99.123Z",
+                  "title": "Mat",
+                  "progressTitle": "6500 av 9000"
+                }
+              }
+            ],
+            [
+              {
+                "id": 1336,
+                "measurable": "meal",
+                "description": "Det går bra nu!",
+                "value": 1,
+                "valueCategory": "vlcd",
+                "timestamp": "2015-05-12T17:08:12.123Z",
+                "goal": {
+                  "id": 4321,
+                  "measurable": "meal",
+                  "valueCategory": "vlcd",
+                  "visible": true,
+                  "value": 0.8,
+                  "from": "2015-05-01T00:00:00.123Z",
+                  "to": "2015-05-31T23:59:99.123Z",
+                  "title": "Mat",
+                  "progressTitle": "6500 av 9000"
+                }
+              }
+            ],
+            [
+              {
+                "id": 1336,
+                "measurable": "meal",
+                "description": "Allt som kunde gå fel gick fel...",
+                "value": 1,
+                "valueCategory": "vlcd",
+                "timestamp": "2015-05-12T17:08:12.123Z",
+                "goal": {
+                  "id": 4321,
+                  "measurable": "meal",
+                  "valueCategory": "vlcd",
+                  "visible": true,
+                  "value": 0.8,
+                  "from": "2015-05-01T00:00:00.123Z",
+                  "to": "2015-05-31T23:59:99.123Z",
+                  "title": "Mat",
+                  "progressTitle": "6500 av 9000"
+                }
+              }
+            ]
 
 #### Log an activity as a log event [POST]
 <!-- The server will aggregate log events appriopriately -->
@@ -251,84 +316,6 @@ Measurable meal:    **rapid_start**   **rapid**   **varied**   **palm_minus**   
     + Headers
 
             Location: /{customer_id}/logs/{id}
-
-
-#### Retrieve logs for a goal [GET /mock/{customer_id}/logs/{goal_id}]
-Retrieve logs for a certain goal
-
-+ Request (application/json)
-    + Body
-            
-            {
-                "only_with_comments": true
-            }
-
-+ Response 200 (application/json)
-
-            [
-              {
-                "id": 1336,
-                "measurable": "meal",
-                "comments": [
-                  {
-                    "comment": "Först gick det bra, sen blev det jobbigt...",
-                    "timestamp": "2015-05-12T17:08:12.123Z"
-                  }
-                ],
-                "value": 1,
-                "valueCategory": "vlcd",
-                "goal": {
-                  "id": 4321,
-                  "measurable": "meal",
-                  "valueCategory": "vlcd",
-                  "visible": true,
-                  "value": 0.8,
-                  "from": "2015-05-01T00:00:00.123Z",
-                  "to": "2015-05-31T23:59:99.123Z",
-                  "title": "Mat",
-                  "progressTitle": "6500 av 9000",
-                  "statistics": [
-                    {
-                      "labelTitle": "M",
-                      "labelSubtitle": "21/1",
-                      "progress": 0.6
-                    }
-                  ]
-                },
-                "timestamp": "2015-05-12T17:08:12.123Z"
-              },
-                           {
-                "id": 1336,
-                "measurable": "meal",
-                "comments": [
-                  {
-                    "comment": "Först gick det bra, sen blev det jobbigt...",
-                    "timestamp": "2015-05-12T17:08:12.123Z"
-                  }
-                ],
-                "value": 1,
-                "valueCategory": "vlcd",
-                "goal": {
-                  "id": 4321,
-                  "measurable": "meal",
-                  "valueCategory": "vlcd",
-                  "visible": true,
-                  "value": 0.8,
-                  "from": "2015-05-01T00:00:00.123Z",
-                  "to": "2015-05-31T23:59:99.123Z",
-                  "title": "Mat",
-                  "progressTitle": "6500 av 9000",
-                  "statistics": [
-                    {
-                      "labelTitle": "M",
-                      "labelSubtitle": "21/1",
-                      "progress": 0.6
-                    }
-                  ]
-                },
-                "timestamp": "2015-05-12T17:08:12.123Z"
-              }
-            ]
 
 
 # Group Goals Mock endpoint
