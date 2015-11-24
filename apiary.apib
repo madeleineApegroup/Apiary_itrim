@@ -3270,12 +3270,13 @@ Mock of goal statistics for custom goal
 + id: 4321 (required, number)
 + measurable: meal (required, string)
 + valueCategory: vlcd (optional, string)
-+ visible: true (required, boolean)
-+ value: 0.8 (required, number) <!-- Value ranges between 0 and infinity where 1.0 is the normalized goal amount -->
++ source: MYITRIM (required, string)
++ progress (array[string])
++ label: veckans mål (optional, string)
++ target: 0.8 (required, number) <!-- Value ranges between 0 and infinity where 1.0 is the normalized goal amount -->
 + from: `2015-05-01T00:00:00.123Z` (required, string)
 + to: `2015-05-31T23:59:99.123Z` (required, string)
 + title: Mat (required, string)
-+ progressTitle: 6500 av 9000 (optional, string)
 
 ### HealthAttribute (object)
 + id: 4321 (required, number)
