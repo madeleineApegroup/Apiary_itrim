@@ -51,13 +51,13 @@ Measurable meal:  **rapid_start**   **rapid**   **varied**   **palm_minus**   **
 Retrieve logs and include historic goals in the response if ***includeGoal*** is set to true. Please note that this api call uses base url ***api.itrim.se*** and not apegroup-api.itrim.se
 + Parameters
     + measurable: training (optional, string) - Filter on measurable (comma separated for multiple measurables)
-    + sort: asc (optional, string)
+    + sort: asc (optional, string) - asc or desc, sorts on created time
     + limit (optional, number) - Maximum number of entries to return
         + Default: 100
     + skip (optional, number) - Number of items to skip
         + Default: 0
-    + start (required, date, `1970-01-01T00:00:00.000Z`)
-    + stop (required, date, `2015-05-13T18:08:12.123Z`)
+    + start (required, date, `1970-01-01T00:00:00.000Z`) - Only return logs created after this date
+    + stop (required, date, `2015-05-13T18:08:12.123Z`) - Only return logs created before this date
     + includeGoal: true (optional, boolean) - Include goal in result if set to true
     + requireDescription: true (optional, boolean) - Only return logs that has a description if set to true
 
