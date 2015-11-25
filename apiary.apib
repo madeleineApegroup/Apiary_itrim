@@ -224,7 +224,7 @@ Measurable training:   **pt**   **circle**   **other**
 
 Measurable meal:    **rapid_start**   **rapid**   **varied**   **palm_minus**   **palm** **palm_plus** 
 
-#### Retrieve logs for a goal [GET /{customer_id}/logs{?measurable}{?sort}{?start}{?stop}{?limit}{?skip}{?includeGoal}{?requireDescription}]
+#### Retrieve logs for measurable [GET /{customer_id}/logs{?measurable}{?sort}{?start}{?stop}{?limit}{?skip}{?includeGoal}{?requireDescription}]
 
 + Parameters
     + measurable: training (optional, string) - Filter on measurable (comma separated for multiple measurables)
@@ -253,20 +253,19 @@ Retrieve logs
                   "id": 4321,
                   "measurable": "meal",
                   "valueCategory": "vlcd",
-                  "visible": true,
-                  "value": 0.8,
+                  "source": "MYITRIM",
+                  "progress": [],
+                  "label": "veckans mål",
+                  "target": 0.8,
                   "from": "2015-05-01T00:00:00.123Z",
                   "to": "2015-05-31T23:59:99.123Z",
-                  "title": "Mat",
-                  "progressTitle": "6500 av 9000"
+                  "title": "Mat"
                 }
-              }
-            ],
-            [
+              },
               {
                 "id": 1336,
                 "measurable": "meal",
-                "description": "Det går bra nu!",
+                "description": "Oerhört motigt idag!",
                 "value": 1,
                 "valueCategory": "vlcd",
                 "timestamp": "2015-05-12T17:08:12.123Z",
@@ -274,20 +273,19 @@ Retrieve logs
                   "id": 4321,
                   "measurable": "meal",
                   "valueCategory": "vlcd",
-                  "visible": true,
-                  "value": 0.8,
+                  "source": "MYITRIM",
+                  "progress": [],
+                  "label": "veckans mål",
+                  "target": 0.8,
                   "from": "2015-05-01T00:00:00.123Z",
                   "to": "2015-05-31T23:59:99.123Z",
-                  "title": "Mat",
-                  "progressTitle": "6500 av 9000"
+                  "title": "Mat"
                 }
-              }
-            ],
-            [
+              },
               {
                 "id": 1336,
                 "measurable": "meal",
-                "description": "Allt som kunde gå fel gick fel...",
+                "description": "Hurra! Jag klarar allt! Jag är oslagbar!",
                 "value": 1,
                 "valueCategory": "vlcd",
                 "timestamp": "2015-05-12T17:08:12.123Z",
@@ -295,12 +293,13 @@ Retrieve logs
                   "id": 4321,
                   "measurable": "meal",
                   "valueCategory": "vlcd",
-                  "visible": true,
-                  "value": 0.8,
+                  "source": "MYITRIM",
+                  "progress": [],
+                  "label": "veckans mål",
+                  "target": 0.8,
                   "from": "2015-05-01T00:00:00.123Z",
                   "to": "2015-05-31T23:59:99.123Z",
-                  "title": "Mat",
-                  "progressTitle": "6500 av 9000"
+                  "title": "Mat"
                 }
               }
             ]
