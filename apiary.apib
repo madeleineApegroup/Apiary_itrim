@@ -48,7 +48,7 @@ Measurable meal:  **rapid_start**   **rapid**   **varied**   **palm_minus**   **
             Location: /{customer_id}/logs/{id}
             
 ### Retrieve logs for a goal [GET /{customer_id}/logs{?measurable}{?sort}{?start}{?stop}{?limit}{?skip}{?includeGoal}{?requireDescription}]
-This api call uses base url ***api.itrim.se*** and not apegroup-api.itrim.se
+Retrieve logs and include historic goals in the response if ***includeGoal*** is set to true. Please note that this api call uses base url ***api.itrim.se*** and not apegroup-api.itrim.se
 + Parameters
     + measurable: training (optional, string) - Filter on measurable (comma separated for multiple measurables)
     + sort: asc (optional, string)
@@ -58,9 +58,8 @@ This api call uses base url ***api.itrim.se*** and not apegroup-api.itrim.se
         + Default: 0
     + start (required, date, `1970-01-01T00:00:00.000Z`)
     + stop (required, date, `2015-05-13T18:08:12.123Z`)
-    + includeGoal: true (optional, boolean) - Include goal in result?
-    + requireDescription: true (optional, boolean) - Only logs that has a description?
-Retrieve logs
+    + includeGoal: true (optional, boolean) - Include goal in result if set to true
+    + requireDescription: true (optional, boolean) - Only return logs that has a description if set to true
 
 + Response 200 (application/json)
     + Attributes (array[LogEventWithGoal])
