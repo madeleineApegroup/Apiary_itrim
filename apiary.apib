@@ -47,7 +47,7 @@ Measurable meal:  **rapid_start**   **rapid**   **varied**   **palm_minus**   **
 
             Location: /{customer_id}/logs/{id}
             
-### Retrieve logs for one or more measurables [GET /{customer_id}/logs{?measurable}{?sort}{?start}{?stop}{?limit}{?skip}{?includeGoal}{?requireDescription}]
+### Retrieve logs for one or more measurables [GET /{customer_id}/logs{?measurable}{?sort}{?start}{?stop}{?limit}{?skip}{?includeGoal}{?hasNote}]
 Retrieve logs and include historic goals in the response if ***includeGoal*** is set to true. Please note that this api call uses base url ***api.itrim.se*** and not apegroup-api.itrim.se
 + Parameters
     + measurable: training (optional, string) - Filter on measurable (comma separated for multiple measurables)
@@ -59,7 +59,7 @@ Retrieve logs and include historic goals in the response if ***includeGoal*** is
     + start (required, date, `1970-01-01T00:00:00.000Z`) - Only return logs created after this date
     + stop (required, date, `2015-05-13T18:08:12.123Z`) - Only return logs created before this date
     + includeGoal: true (optional, boolean) - Include goal in result if set to true
-    + requireDescription: true (optional, boolean) - Only return logs that has a description if set to true
+    + hasNote: true (optional, boolean) - Only return logs that has a note if set to true
 
 + Response 200 (application/json)
     + Attributes (array[LogEventWithGoal])
@@ -224,7 +224,7 @@ Measurable training:   **pt**   **circle**   **other**
 
 Measurable meal:    **rapid_start**   **rapid**   **varied**   **palm_minus**   **palm** **palm_plus** 
 
-#### Retrieve logs for measurable [GET /{customer_id}/logs{?measurable}{?sort}{?start}{?stop}{?limit}{?skip}{?includeGoal}{?requireDescription}]
+#### Retrieve logs for measurable [GET /{customer_id}/logs{?measurable}{?sort}{?start}{?stop}{?limit}{?skip}{?includeGoal}{?hasNote}]
 
 + Parameters
     + measurable: training (optional, string) - Filter on measurable (comma separated for multiple measurables)
@@ -235,8 +235,8 @@ Measurable meal:    **rapid_start**   **rapid**   **varied**   **palm_minus**   
         + Default: 0
     + start (required, date, `1970-01-01T00:00:00.000Z`)
     + stop (required, date, `2015-05-13T18:08:12.123Z`)
-    + includeGoal: true (optional, boolean) - Include goal in result?
-    + requireDescription: true (optional, boolean) - Only logs that has a description?
+    + includeGoal: true (optional, boolean) - Include goal in result if set to true
+    + hasNote: true (optional, boolean) - Only logs that has a note if set to true
 Retrieve logs
 
 + Response 200 (application/json)
@@ -245,7 +245,7 @@ Retrieve logs
               {
                 "id": 1336,
                 "measurable": "meal",
-                "description": "Det gick lätt i början, sen trögt!",
+                "note": "Det gick lätt i början, sen trögt!",
                 "value": 1,
                 "valueCategory": "vlcd",
                 "timestamp": "2015-05-12T17:08:12.123Z",
@@ -265,7 +265,7 @@ Retrieve logs
               {
                 "id": 1336,
                 "measurable": "meal",
-                "description": "Oerhört motigt idag!",
+                "note": "Oerhört motigt idag!",
                 "value": 1,
                 "valueCategory": "vlcd",
                 "timestamp": "2015-05-12T17:08:12.123Z",
@@ -285,7 +285,7 @@ Retrieve logs
               {
                 "id": 1336,
                 "measurable": "meal",
-                "description": "Hurra! Jag klarar allt! Jag är oslagbar!",
+                "note": "Hurra! Jag klarar allt! Jag är oslagbar!",
                 "value": 1,
                 "valueCategory": "vlcd",
                 "timestamp": "2015-05-12T17:08:12.123Z",
@@ -3287,7 +3287,7 @@ Mock of goal statistics for custom goal
 ### LogEvent (object)
 + id: 1336 (required, number)
 + measurable: meal (required, string)
-+ description: Det gick lätt i början, sen trögt! (optional, string)
++ note: Det gick lätt i början, sen trögt! (optional, string)
 + value: 1.0 (required, number) <!-- Value ranges between 0 and infinity where 1.0 is the normalized goal amount -->
 + valueCategory: vlcd (optional, string)
 + timestamp: `2015-05-12T17:08:12.123Z` (required, string)
@@ -3295,7 +3295,7 @@ Mock of goal statistics for custom goal
 ### LogEventWithGoal
 + id: 1336 (required, number)
 + measurable: meal (required, string)
-+ description: Det gick lätt i början, sen trögt! (optional, string)
++ note: Det gick lätt i början, sen trögt! (optional, string)
 + value: 1.0 (required, number) <!-- Value ranges between 0 and infinity where 1.0 is the normalized goal amount -->
 + valueCategory: vlcd (optional, string)
 + timestamp: `2015-05-12T17:08:12.123Z` (required, string)
