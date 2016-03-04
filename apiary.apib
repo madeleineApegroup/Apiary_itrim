@@ -64,6 +64,15 @@ Retrieve logs and include historic goals in the response if ***includeGoal*** is
 + Response 200 (application/json)
     + Attributes (array[LogEventWithGoal])
 
+### Delete logged activity [DELETE /{customer_id}/logs/{id}]
+This action allows you to delete an logged activity. Since Retrofit has issues with handling a 204 response, we decided to use 200 instead for now.
+
++ Response 200
+    + Headers
+    
+            Location: /{customer_id}/logs/{id}
+
+
 ## Goal [/{customer_id}/goals]
 Handling of goals. Possible values for measurable are as follows...
 Measurable:   **sleep**   **feeling**   **meal**   **drink**   **movement**  **training**   **custom_week**  
@@ -315,6 +324,12 @@ Retrieve logs
 
             Location: /{customer_id}/logs/{id}
 
+#### Delete logged activity [DELETE /{customer_id}/logs/{id}]
+
++ Response 200
+    + Headers
+    
+            Location: /12345/logs/6789
 
 # Group Goals Mock endpoint
 
